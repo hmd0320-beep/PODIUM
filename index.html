@@ -488,6 +488,73 @@ footer{
 
 
 .usage-panel{margin-top:14px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.018);padding:14px}.usage-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.usage-head h3{margin:0;font-family:'Oswald',sans-serif;font-size:16px}.usage-summary{margin-top:6px;color:var(--muted);font-size:11.5px;line-height:1.5}.usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.usage-box{border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px;background:rgba(0,0,0,.12)}.usage-box strong{font-size:12px}.usage-list{display:grid;gap:7px;margin-top:8px}.usage-row{display:flex;justify-content:space-between;gap:10px;font-size:11.5px}.usage-row span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.usage-row b{font-variant-numeric:tabular-nums}.usage-empty{color:var(--muted);font-size:11.5px}.usage-note{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.5}@media(max-width:560px){.usage-grid{grid-template-columns:1fr}.usage-panel{padding:12px}.usage-head{align-items:center}}
+
+
+/* PODIUM v1.1 mobile tab shell */
+.app-shell-tabs{display:none}
+.mobile-tab-panel{display:none}
+.mobile-tab-panel.is-active{display:block}
+.mobile-home{display:grid;gap:12px}
+.home-status-card,.home-recommend-card,.home-shortcuts{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px}
+.home-kicker{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.home-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:5px}
+.home-title-row strong{font-family:'Oswald',sans-serif;font-size:22px}
+.home-live{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#b8e6c4;font-weight:800}
+.home-live:before{content:'';width:8px;height:8px;border-radius:50%;background:#6fcf97;box-shadow:0 0 0 5px rgba(111,207,151,.09)}
+.home-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.home-metric{background:var(--panel-alt);border:1px solid var(--border);border-radius:12px;padding:11px 8px;text-align:center;min-width:0}
+.home-metric span{display:block;color:var(--muted);font-size:9.5px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-metric b{font-family:'Oswald',sans-serif;font-size:19px;color:var(--text)}
+.home-recommend-card{background:linear-gradient(145deg,rgba(201,162,77,.12),rgba(21,25,31,.96));border-color:rgba(201,162,77,.3)}
+.home-route{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;margin-top:14px}
+.home-route-person,.home-route-target{min-width:0}
+.home-route-person span,.home-route-target span{display:block;color:var(--muted);font-size:9.5px;margin-bottom:4px}
+.home-route-person strong,.home-route-target strong{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-route-arrow{font-size:21px;color:var(--accent)}
+.home-recommend-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}
+.home-chip{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.045);border:1px solid var(--border);font-size:10px;color:var(--muted)}
+.home-chip strong{color:var(--amber)}
+.home-main-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.home-main-actions button{min-height:52px;border-radius:13px;font-weight:800;border:1px solid var(--border);background:var(--panel-alt);color:var(--text)}
+.home-main-actions .primary{background:linear-gradient(135deg,#ecd38f,var(--accent));border:0;color:#21170a}
+.home-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+.home-shortcuts button{min-height:48px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.025);color:var(--text);font-weight:750}
+.tab-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;padding:2px 2px 0}
+.tab-section-title h2{font-family:'Oswald',sans-serif;font-size:21px;margin:0}
+.tab-section-title span{font-size:10px;color:var(--muted)}
+.mobile-tab-panel>.grid:first-of-type,.mobile-tab-panel>.board:first-of-type,.mobile-tab-panel>.quick-entry:first-of-type{margin-top:0!important}
+
+@media(max-width:760px){
+  html,body{height:100%;overflow:hidden}
+  body{padding:0;background:var(--bg)}
+  .wrap{height:100%;max-width:none;display:flex;flex-direction:column;padding:0}
+  .wrap>header{flex:0 0 auto;margin:0;padding:13px 16px 9px;background:rgba(12,14,18,.96);border-bottom:1px solid var(--border);z-index:20}
+  .wrap>header .brandrow{justify-content:flex-start}.wrap>header .trophy-mark{width:21px;height:21px}.wrap>header .eyebrow{font-size:18px}.wrap>header .sub,.wrap>header .divider{display:none}
+  .app-shell-tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:200;background:rgba(12,14,18,.96);border-top:1px solid var(--border);padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));backdrop-filter:blur(18px)}
+  .app-tab-btn{appearance:none;border:0;background:transparent;color:#717b87;min-height:52px;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:800;padding:3px 1px;line-height:1.1}
+  .app-tab-btn .ico{font-size:18px;line-height:1}.app-tab-btn.is-active{color:var(--amber);background:rgba(201,162,77,.1)}
+  .mobile-tab-panel{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:14px 12px calc(78px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+  .mobile-tab-panel.is-active{display:block}
+  .mobile-home{min-height:100%;align-content:start}
+  .battle-launch{display:none!important}
+  .panel,.board,.quick-entry,.smart-ops,.beta-center{border-radius:14px;padding:14px;margin-top:12px}
+  .grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:10px!important}
+  .panel h2,.board h2{font-size:16px}
+  .desc,.manual-note,.region-note,.strategy-help{font-size:11px;line-height:1.55}
+  details.advanced-settings{width:100%}
+  .actions{margin:10px 0;position:static}.simple-actions{width:100%}
+  .simple-actions .cta,.simple-actions .ghost{min-height:48px}
+  .smart-ops-grid,.beta-grid,.usage-grid{grid-template-columns:1fr!important}
+  .smart-ops-head{align-items:flex-start}.smart-ops-title{flex-wrap:wrap}.smart-ops-box{padding:12px}
+  .board-head{align-items:flex-start}.board-head>div{width:100%}
+  .season-toolbar{width:100%;display:grid!important;grid-template-columns:1fr 1fr}.season-toolbar input{grid-column:1/-1}
+  .member-table,.manual-table,.battle-table,.roster-table,.shared-table{font-size:11px}
+  footer{padding-bottom:12px}
+}
+@media(min-width:761px){
+  .mobile-tab-panel{display:block!important}
+}
+
 </style>
 </head>
 <body>
@@ -604,10 +671,10 @@ footer{
     <div class="quick-entry-grid">
       <div class="quick-entry-card">
         <h3>우리 클럽원 / 공격수</h3>
-        <div class="hint">한 줄에 <b>이름, 순위</b>. 쉼표·탭·공백을 지원합니다. 예: 닉네임 125</div>
-        <textarea id="quickOurInput" placeholder="닉네임1 125
-닉네임2 340
-닉네임3 820"></textarea>
+        <div class="hint">한 줄에 <b>이름, 순위</b>. 쉼표·탭·공백을 지원합니다. 예: 준현 125</div>
+        <textarea id="quickOurInput" placeholder="준현 125
+민수 340
+철수 820"></textarea>
       </div>
       <div class="quick-entry-card">
         <h3>상대 수비수</h3>
@@ -3427,6 +3494,138 @@ try{ detailView=localStorage.getItem('podium_detail_view')==='1'; }catch(e){}
 applyDetailView();
 updateOrderModeUI();
 loadState().then(()=>{ restoreActiveOrderSession(); updateRecommendationReadiness(); renderManualRows(); renderSnapshotList(); updateSimulationUi(); renderBetaReadiness(); renderOperationLog(); renderAiContext(); renderSeasonReport(); renderUsagePanel(); });
+
+
+// PODIUM v1.1 mobile tab navigation and compact home
+(function setupMobileAppShell(){
+  const wrap=document.querySelector('.wrap');
+  if(!wrap||document.getElementById('appShellTabs'))return;
+
+  const header=wrap.querySelector(':scope > header');
+  const footer=wrap.querySelector(':scope > footer');
+  const children=[...wrap.children].filter(el=>el!==header&&el.tagName!=='FOOTER');
+  const panels={};
+  const makePanel=(id,title,subtitle)=>{
+    const panel=document.createElement('main');
+    panel.className='mobile-tab-panel';
+    panel.id=`tab-${id}`;
+    panel.dataset.tab=id;
+    if(id!=='home')panel.innerHTML=`<div class="tab-section-title"><h2>${title}</h2><span>${subtitle}</span></div>`;
+    panels[id]=panel;wrap.appendChild(panel);return panel;
+  };
+  makePanel('home','홈','현재 상황');
+  makePanel('battle','클럽대전 현황','추천 · 기록 · 운영');
+  makePanel('roster','명단','클럽원 · 공격수 · 상대 수비');
+  makePanel('report','리포트','전적 · 시즌 분석');
+  makePanel('settings','설정','백업 · 복구 · 진단');
+
+  panels.home.innerHTML=`
+    <section class="mobile-home" aria-label="PODIUM 홈">
+      <div class="home-status-card">
+        <div class="home-kicker">PODIUM LIVE</div>
+        <div class="home-title-row"><strong>클럽대전 운영</strong><span class="home-live" id="homePhase">준비 중</span></div>
+        <div class="home-metrics">
+          <div class="home-metric"><span>개인 공격권</span><b id="homePersonalRights">0</b></div>
+          <div class="home-metric"><span>공용 공격</span><b id="homeSharedRights">6</b></div>
+          <div class="home-metric"><span>진행 예약</span><b id="homeReservations">0</b></div>
+        </div>
+      </div>
+      <div class="home-recommend-card">
+        <div class="home-kicker">다음 추천</div>
+        <div class="home-route">
+          <div class="home-route-person"><span>공격수</span><strong id="homeAttacker">추천 필요</strong></div>
+          <div class="home-route-arrow">→</div>
+          <div class="home-route-target"><span>대상</span><strong id="homeTarget">명단 입력</strong></div>
+        </div>
+        <div class="home-recommend-meta" id="homeRecommendMeta"><span class="home-chip">추천 오더를 생성해 주세요.</span></div>
+        <div class="home-main-actions">
+          <button type="button" id="homeCalcBtn" class="primary">추천 생성</button>
+          <button type="button" id="homeBattleBtn">현황 보기</button>
+          <button type="button" id="homeRosterBtn">명단 관리</button>
+        </div>
+      </div>
+      <div class="home-shortcuts">
+        <button type="button" id="homeOpenBattleMode">집중 전투 모드</button>
+        <button type="button" id="homeReportBtn">시즌 리포트</button>
+      </div>
+    </section>`;
+
+  const topBoards=[...children.filter(el=>el.classList?.contains('board'))];
+  const recommendationBoard=topBoards.find(el=>!el.classList.contains('section-gap'));
+  const manualBoard=topBoards.find(el=>el.classList.contains('manual-record'));
+  const battleImport=topBoards.find(el=>el.classList.contains('battle-import'));
+  const seasonReport=document.getElementById('seasonReport');
+  const betaCenter=document.getElementById('betaCenter');
+  const historyBoard=topBoards.find(el=>el!==recommendationBoard&&el!==manualBoard&&el!==battleImport&&el!==seasonReport&&el!==betaCenter);
+
+  const move=(el,panel)=>{if(el&&panel)panel.appendChild(el);};
+  children.forEach(el=>{
+    if(el===seasonReport||el===historyBoard)return move(el,panels.report);
+    if(el===betaCenter)return move(el,panels.settings);
+    if(el===recommendationBoard||el===manualBoard||el===battleImport||el.classList?.contains('actions')||el.id==='strategyHelp'||el.id==='aiContext'||el.id==='recommendReadiness'||el.id==='smartOperationAssistant')return move(el,panels.battle);
+    if(el.classList?.contains('grid')||el.id==='quickEntrySection')return move(el,panels.roster);
+    move(el,panels.settings);
+  });
+  move(footer,panels.settings);
+
+  const nav=document.createElement('nav');
+  nav.className='app-shell-tabs';nav.id='appShellTabs';nav.setAttribute('aria-label','주요 메뉴');
+  nav.innerHTML=[
+    ['home','⌂','홈'],['battle','⚔','클럽대전 현황'],['roster','👥','명단'],['report','▥','리포트'],['settings','⚙','설정']
+  ].map(([id,ico,label])=>`<button type="button" class="app-tab-btn" data-app-tab="${id}" aria-controls="tab-${id}"><span class="ico">${ico}</span><span>${label}</span></button>`).join('');
+  wrap.appendChild(nav);
+
+  const selectTab=(id,save=true)=>{
+    if(!panels[id])id='home';
+    Object.entries(panels).forEach(([key,p])=>p.classList.toggle('is-active',key===id));
+    nav.querySelectorAll('[data-app-tab]').forEach(btn=>{const on=btn.dataset.appTab===id;btn.classList.toggle('is-active',on);btn.setAttribute('aria-selected',on?'true':'false');});
+    if(save)try{localStorage.setItem('podium_active_tab',id);}catch(e){}
+    panels[id].scrollTop=0;
+    renderMobileHome();
+  };
+  window.selectPodiumTab=selectTab;
+  nav.addEventListener('click',e=>{const btn=e.target.closest('[data-app-tab]');if(btn)selectTab(btn.dataset.appTab);});
+
+  function renderMobileHome(){
+    if(!document.getElementById('homePersonalRights'))return;
+    const namedAttackers=(attackers||[]).filter(x=>String(x.name||'').trim());
+    const personalLeft=namedAttackers.reduce((sum,x)=>sum+Math.max(0,3-(Number(x.usedAttacks)||0)),0);
+    const sharedUsed=(sharedLineup||[]).filter(x=>x.done).length;
+    const playable=typeof getPlayableBattleResults==='function'?getPlayableBattleResults():[];
+    const reservation=typeof getActiveReservation==='function'?getActiveReservation():null;
+    const next=reservation||playable.find(r=>r.actual==='pending')||playable[0]||null;
+    document.getElementById('homePersonalRights').textContent=String(personalLeft);
+    document.getElementById('homeSharedRights').textContent=String(Math.max(0,6-sharedUsed));
+    document.getElementById('homeReservations').textContent=reservation?'1':'0';
+    const phase=document.getElementById('homePhase');
+    phase.textContent=reservation?'공격 예약 중':playable.length?'운영 중':'준비 중';
+    document.getElementById('homeAttacker').textContent=next?.attacker?.name||'추천 필요';
+    document.getElementById('homeTarget').textContent=next?.defender?`${normalizeRegion(next.defender.region)||'지역 미정'} · ${next.defender.name||'수비수'}`:'명단 입력';
+    const meta=document.getElementById('homeRecommendMeta');
+    if(next){
+      const score=Number(next.score)||Number(next.points)||0;
+      const chance=next.winChance??next.chance??null;
+      meta.innerHTML=`<span class="home-chip">예상 <strong>${score||'–'}점</strong></span>${chance!==null?`<span class="home-chip">성공 <strong>${Math.round(Number(chance)||0)}%</strong></span>`:''}<span class="home-chip">${reservation?'예약됨':'대기 중'}</span>`;
+    }else meta.innerHTML='<span class="home-chip">명단 입력 후 추천을 생성해 주세요.</span>';
+  }
+  window.renderMobileHome=renderMobileHome;
+
+  document.getElementById('homeCalcBtn').addEventListener('click',()=>{document.getElementById('calcBtn')?.click();selectTab('battle');setTimeout(renderMobileHome,100);});
+  document.getElementById('homeBattleBtn').addEventListener('click',()=>selectTab('battle'));
+  document.getElementById('homeRosterBtn').addEventListener('click',()=>selectTab('roster'));
+  document.getElementById('homeReportBtn').addEventListener('click',()=>{selectTab('report');document.getElementById('seasonReport')?.scrollIntoView({block:'start'});});
+  document.getElementById('homeOpenBattleMode').addEventListener('click',()=>document.getElementById('battleModeLaunch')?.click());
+
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#calcBtn,#saveResultBtn,#saveManualRecord,#saveBattleImport,#addAtk,#addDef,#addMember,#recommendSharedBtn,.tag,[data-result]'))setTimeout(renderMobileHome,80);
+  });
+  const observer=new MutationObserver(()=>{if(panels.home.classList.contains('is-active'))renderMobileHome();});
+  ['orderList','sharedStatus','atkBody','battleTimeline'].forEach(id=>{const el=document.getElementById(id);if(el)observer.observe(el,{childList:true,subtree:true,characterData:true});});
+
+  let initial='home';try{initial=localStorage.getItem('podium_active_tab')||'home';}catch(e){}
+  selectTab(initial,false);renderMobileHome();
+})();
+
 </script>
 </body>
 </html>
