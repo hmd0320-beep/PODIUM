@@ -3,134 +3,105 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>클대 오더 Core v1.0</title>
+<title>클대 오더 MVP v2</title>
 <style>
-:root{--bg:#0b0e13;--panel:#141922;--panel2:#1a202b;--line:#2b3442;--text:#f4f6f8;--muted:#98a2b3;--gold:#d6ad57;--red:#ef6b63;--green:#63d38a;--blue:#7db4ff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}.app{max-width:980px;margin:auto;padding:18px 14px 88px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.brand h1{margin:0;font-size:22px}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.ver{font-size:11px;color:var(--gold);border:1px solid #66512c;border-radius:999px;padding:5px 9px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 82%,transparent);padding:6px 0 12px}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:11px 8px;border-radius:10px;font-weight:700;cursor:pointer}.tab.active{color:#19130a;background:var(--gold);border-color:var(--gold)}.page{display:none}.page.active{display:block}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:12px}.card h2{font-size:16px;margin:0 0 5px}.desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.grow{flex:1}.input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.primary{background:var(--gold);color:#17120a}.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#3b1e20;color:#ffaaa4;border:1px solid #693135}.small{padding:7px 10px;font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.stat span{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:20px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:620px}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{color:var(--muted);font-size:11px;background:#11161e;position:sticky;top:0}.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:11px}.win{background:#183925;color:#90e6aa}.loss{background:#412122;color:#ff9b96}.warn{color:#ffc16b}.ok{color:var(--green)}.error{color:var(--red)}.notice{padding:10px 12px;border-radius:10px;font-size:12px;margin:10px 0;display:none}.notice.show{display:block}.notice.ok{background:#173321;border:1px solid #2d6540}.notice.err{background:#3d1c1f;border:1px solid #703338}.manual-grid{display:grid;grid-template-columns:1.1fr 1.1fr .7fr .7fr auto;gap:7px}.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:8px}.thumb{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}.thumb img{width:100%;height:150px;object-fit:cover;display:block}.thumb div{padding:7px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.order{display:grid;grid-template-columns:40px 1fr 1fr 80px;gap:8px;align-items:center;padding:11px;border-bottom:1px solid var(--line)}.order:last-child{border:0}.rank{font-weight:900;color:var(--gold)}.muted{color:var(--muted);font-size:12px}.empty{text-align:center;color:var(--muted);padding:25px 10px}.toolbar{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}.file{display:none}.filelabel{display:inline-block}.critical{border-color:#714247;background:#24171a}.critical h2{color:#ffaaa4}@media(max-width:720px){.statgrid{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.manual-grid{grid-template-columns:1fr 1fr}.manual-grid .score,.manual-grid .add{grid-column:span 1}.tabs{grid-template-columns:repeat(4,minmax(0,1fr))}.tab{font-size:12px;padding:10px 4px}.order{grid-template-columns:30px 1fr}.order .right{display:none}}
+:root{--bg:#090d14;--panel:#131a24;--panel2:#1a2330;--line:#2a3545;--text:#f5f7fa;--muted:#9aa7b8;--gold:#e0b75f;--green:#59d48d;--red:#ff7770;--blue:#76b6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}.app{max-width:1080px;margin:auto;padding:16px 12px 88px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.top h1{margin:0;font-size:21px}.top p{margin:4px 0 0;color:var(--muted);font-size:12px}.badge{border:1px solid #6d582c;color:var(--gold);border-radius:999px;padding:5px 9px;font-size:11px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:sticky;top:0;z-index:20;padding:6px 0 12px;background:linear-gradient(var(--bg) 80%,transparent)}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 8px;border-radius:11px;font-weight:800}.tab.active{background:var(--gold);color:#17120a;border-color:var(--gold)}.page{display:none}.page.active{display:block}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:12px}.card h2{font-size:16px;margin:0 0 5px}.desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grow{flex:1}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:var(--gold);color:#17120a}.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#3b1d20;color:#ffaaa6;border:1px solid #6d3035}.small{font-size:12px;padding:7px 9px}.input,textarea,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.stat span{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:20px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:9px 8px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{font-size:11px;color:var(--muted);background:#101620;position:sticky;top:0}.notice{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;font-size:12px}.notice.show{display:block}.notice.ok{background:#173522;border:1px solid #2f6b43}.notice.err{background:#3a1c1f;border:1px solid #6c3338}.pill{display:inline-block;border-radius:999px;padding:3px 7px;font-size:11px}.win{background:#183b27;color:#99e9b2}.loss{background:#412123;color:#ff9e98}.draw{background:#313744;color:#c7ced8}.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.thumb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel2)}.thumb img{width:100%;height:160px;object-fit:cover;display:block}.thumb div{padding:7px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file{display:none}.filelabel{display:inline-block}.order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px}.member{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}.member-top{display:flex;justify-content:space-between;gap:8px}.member h3{font-size:14px;margin:0}.muted{color:var(--muted);font-size:12px}.slots{display:flex;gap:5px;margin:10px 0}.slot{width:24px;height:8px;border-radius:999px;background:#344052}.slot.used{background:var(--gold)}.slot.over{background:var(--red)}.assignment{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:8px}.empty{text-align:center;color:var(--muted);padding:24px}.draft-input{min-width:120px}.hint{border-left:3px solid var(--blue);padding:9px 10px;background:#142033;border-radius:8px;font-size:12px;color:#cfe3ff}.toolbar{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}.statgrid{grid-template-columns:repeat(2,1fr)}.tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.tab{font-size:12px;padding:10px 4px}.assignment{grid-template-columns:1fr}.thumb img{height:130px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top"><div class="brand"><h1>클대 오더</h1><p>명단 → 전적 입력 → 현황 → 오더</p></div><div class="ver">CORE v1.0</div></div>
+  <div class="top"><div><h1>클대 오더</h1><p>전적 입력 → 오더 작성 → 명단 관리</p></div><div class="badge">MVP v2.0</div></div>
   <div class="tabs">
-    <button class="tab active" data-page="roster">명단</button>
-    <button class="tab" data-page="records">전적 입력</button>
-    <button class="tab" data-page="status">현황</button>
-    <button class="tab" data-page="order">오더</button>
+    <button class="tab active" data-page="records">전적 입력</button>
+    <button class="tab" data-page="order">오더판</button>
+    <button class="tab" data-page="roster">명단</button>
   </div>
 
-  <section class="page active" id="roster">
+  <section class="page active" id="records">
     <div class="card">
-      <h2>클럽원 명단</h2><div class="desc">닉네임만 한 줄에 한 명씩 붙여넣고 저장하세요. 개인 최대 공격 횟수는 3회로 고정됩니다.</div>
-      <textarea id="rosterText" rows="10" placeholder="팩구\n꽥구\nHoi\nSLGENG"></textarea>
-      <div class="row" style="margin-top:10px"><button class="btn primary" id="saveRoster">명단 저장</button><button class="btn ghost" id="exportBtn">백업 내보내기</button><label class="btn ghost filelabel" for="importFile">백업 불러오기</label><input class="file" id="importFile" type="file" accept="application/json"></div>
-      <div id="rosterNotice" class="notice"></div>
-    </div>
-  </section>
-
-  <section class="page" id="records">
-    <div class="card critical">
-      <h2>이미지 인식은 임시 중단</h2>
-      <div class="desc">틀린 결과를 자동 저장하는 기능은 제거했습니다. 여러 캡처를 한꺼번에 불러와 옆에서 확인하며 빠르게 입력할 수 있습니다.</div>
-      <label class="btn ghost filelabel" for="images">캡처 여러 장 불러오기</label><input id="images" class="file" type="file" accept="image/*" multiple>
+      <h2>1. 캡처 여러 장 불러오기</h2>
+      <div class="desc">사진은 한 번에 여러 장 선택할 수 있습니다. 현재 버전은 사진을 옆에 띄워두고 아래 검수표에 빠르게 입력하는 방식입니다.</div>
+      <label class="btn ghost filelabel" for="images">이미지 선택</label><input id="images" class="file" type="file" accept="image/*" multiple>
+      <button class="btn danger small" id="clearImages">이미지 비우기</button>
       <div id="thumbs" class="thumbs" style="margin-top:12px"></div>
     </div>
 
     <div class="card">
-      <h2>일괄 붙여넣기</h2>
-      <div class="desc">형식: 공격자, 상대, 우리점수, 상대점수. 쉼표·탭 모두 지원합니다. 여러 줄을 한 번에 넣으세요.</div>
-      <textarea id="batchText" rows="10" placeholder="Hoi, 망나뇽, 6, 2\nHoi, 망나뇽, 11, 2\nSLGENG, 오스틴은크보딱, 2, 0"></textarea>
-      <div class="row" style="margin-top:10px"><button class="btn primary" id="applyBatch">일괄 반영</button><button class="btn ghost" id="clearBatch">입력칸 비우기</button></div>
+      <h2>2. 전적 일괄 붙여넣기</h2>
+      <div class="desc">형식: 공격자, 상대, 우리점수, 상대점수. 쉼표 또는 탭을 지원합니다.</div>
+      <textarea id="batchText" rows="8" placeholder="팩구, 오스틴은크보딱, 5, 1\n팩구, 성심당원정, 19, 2\nHoi, 망나뇽, 6, 2"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="makeDraft">검수표 만들기</button><button class="btn ghost" id="clearBatch">입력칸 비우기</button></div>
       <div id="batchNotice" class="notice"></div>
     </div>
 
     <div class="card">
-      <h2>빠른 수동 입력</h2><div class="desc">한 경기만 추가할 때 사용합니다. 저장 즉시 현황과 오더에 반영됩니다.</div>
-      <div class="manual-grid">
-        <select id="mAttacker"><option value="">공격자 선택</option></select>
-        <input id="mOpponent" class="input" placeholder="상대 닉네임">
-        <input id="mFor" class="input score" type="number" min="0" placeholder="우리">
-        <input id="mAgainst" class="input score" type="number" min="0" placeholder="상대">
-        <button class="btn primary add" id="addManual">추가</button>
-      </div>
-      <div id="manualNotice" class="notice"></div>
+      <div class="row"><div class="grow"><h2>3. 검수 후 저장</h2><div class="desc" style="margin:0">잘못 읽거나 입력한 칸만 고친 뒤 전체 저장하세요.</div></div><div class="toolbar"><button class="btn ghost small" id="addDraftRow">빈 행 추가</button><button class="btn primary small" id="saveDraft">검수 완료·전체 저장</button></div></div>
+      <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>#</th><th>공격자</th><th>상대</th><th>우리</th><th>상대</th><th>결과</th><th></th></tr></thead><tbody id="draftBody"></tbody></table></div>
+      <div id="draftNotice" class="notice"></div>
     </div>
 
     <div class="card">
-      <div class="row"><div class="grow"><h2>최근 기록</h2><div class="desc" style="margin:0">잘못 입력한 행은 바로 삭제할 수 있습니다.</div></div><button class="btn danger small" id="clearRecords">전체 기록 삭제</button></div>
-      <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>#</th><th>공격자</th><th>상대</th><th>스코어</th><th>결과</th><th></th></tr></thead><tbody id="recordsBody"></tbody></table></div>
+      <div class="row"><div class="grow"><h2>저장된 전적</h2><div class="desc" style="margin:0">현재 매치 기록만 관리합니다.</div></div><button class="btn danger small" id="clearRecords">현재 매치 초기화</button></div>
+      <div class="statgrid" style="margin-top:12px"><div class="stat"><span>전체</span><strong id="sAll">0</strong></div><div class="stat"><span>승</span><strong id="sWin">0</strong></div><div class="stat"><span>패</span><strong id="sLoss">0</strong></div><div class="stat"><span>무</span><strong id="sDraw">0</strong></div></div>
+      <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>#</th><th>공격자</th><th>상대</th><th>점수</th><th>결과</th><th></th></tr></thead><tbody id="recordsBody"></tbody></table></div>
     </div>
   </section>
 
-  <section class="page" id="status">
-    <div class="card"><h2>현재 입력 현황</h2><div class="desc">입력된 전적을 기준으로 자동 계산됩니다.</div><div class="statgrid"><div class="stat"><span>전체 경기</span><strong id="sGames">0</strong></div><div class="stat"><span>승</span><strong id="sWins">0</strong></div><div class="stat"><span>패</span><strong id="sLosses">0</strong></div><div class="stat"><span>승률</span><strong id="sRate">0%</strong></div></div></div>
-    <div class="card"><h2>클럽원별 공격 현황</h2><div class="desc">한 사람당 최대 3회. 4회 이상은 빨간색으로 표시됩니다.</div><div class="tablewrap"><table><thead><tr><th>닉네임</th><th>사용</th><th>남음</th><th>승-패</th><th>득실</th></tr></thead><tbody id="memberStats"></tbody></table></div></div>
+  <section class="page" id="order">
+    <div class="card">
+      <div class="row"><div class="grow"><h2>공격 오더판</h2><div class="desc" style="margin:0">개인 최대 공격 횟수는 3회입니다. 상대와 메모를 적고 완료 처리하면 전적 입력 화면에 반영할 수 있습니다.</div></div><button class="btn ghost small" id="autoOrder">남은 횟수 순 정렬</button></div>
+      <div class="hint" style="margin-top:12px">오더 추천은 과한 자동 판단보다, 남은 공격 횟수와 기존 전적을 참고하는 보조 기능으로만 둡니다.</div>
+      <div id="orderGrid" class="order-grid" style="margin-top:12px"></div>
+    </div>
   </section>
 
-  <section class="page" id="order">
-    <div class="card"><div class="row"><div class="grow"><h2>간단 오더 추천</h2><div class="desc" style="margin:0">공격 횟수가 남았고, 현재 승률이 높은 순으로 정렬합니다. 상대 지정은 운영자가 직접 결정합니다.</div></div><button class="btn ghost small" id="refreshOrder">다시 계산</button></div><div id="orderList" style="margin-top:12px"></div></div>
+  <section class="page" id="roster">
+    <div class="card">
+      <h2>클럽원 명단</h2><div class="desc">한 줄에 한 명씩 입력하세요. 중복 닉네임은 자동 제거됩니다.</div>
+      <textarea id="rosterText" rows="12" placeholder="팩구\n꽥구\nHoi\nSLGENG"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="saveRoster">명단 저장</button><button class="btn ghost" id="exportData">백업 저장</button><label class="btn ghost filelabel" for="importData">백업 불러오기</label><input id="importData" class="file" type="file" accept="application/json"></div>
+      <div id="rosterNotice" class="notice"></div>
+    </div>
   </section>
 </div>
 <script>
 (()=>{
 'use strict';
-const KEY='clubOrderCoreV1';
-const initial={roster:[],records:[]};
+const KEY='clubOrderMvpV2';
+const emptyState={roster:[],records:[],draft:[],orderNotes:{}};
 let state=load();
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&Array.isArray(x.roster)&&Array.isArray(x.records)?x:structuredClone(initial)}catch{return structuredClone(initial)}}
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+let imageUrls=[];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function notice(id,msg,type='ok'){const el=$(id);el.className='notice show '+(type==='err'?'err':'ok');el.textContent=msg;setTimeout(()=>el.classList.remove('show'),3500)}
-function tabs(){document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('#'+b.dataset.page).classList.add('active')})}
-function syncRosterUI(){
-  $('#rosterText').value=state.roster.join('\n');
-  $('#mAttacker').innerHTML='<option value="">공격자 선택</option>'+state.roster.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-}
-function parseRows(text){
-  const rows=[]; const errors=[];
-  text.split(/\r?\n/).forEach((line,i)=>{
-    if(!line.trim()) return;
-    const p=line.includes('\t')?line.split('\t'):line.split(',');
-    const [attacker,opponent,forS,againstS]=p.map(v=>(v??'').trim());
-    const gf=Number(forS),ga=Number(againstS);
-    if(!attacker||!opponent||!Number.isInteger(gf)||!Number.isInteger(ga)||gf<0||ga<0){errors.push(i+1);return}
-    rows.push({id:crypto.randomUUID(),attacker,opponent,for:gf,against:ga,at:Date.now()+i});
-  });
-  return {rows,errors};
-}
-function addRecords(rows){state.records.push(...rows);save();renderAll()}
-function result(r){return r.for>r.against?'승':r.for<r.against?'패':'무'}
-function renderRecords(){
-  const body=$('#recordsBody');
-  const list=[...state.records].reverse();
-  body.innerHTML=list.length?list.map((r,i)=>`<tr><td>${state.records.length-i}</td><td>${esc(r.attacker)}</td><td>${esc(r.opponent)}</td><td>${r.for}-${r.against}</td><td><span class="pill ${result(r)==='승'?'win':result(r)==='패'?'loss':''}">${result(r)}</span></td><td><button class="btn danger small del" data-id="${r.id}">삭제</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr>`;
-  body.querySelectorAll('.del').forEach(b=>b.onclick=()=>{state.records=state.records.filter(r=>r.id!==b.dataset.id);save();renderAll()});
-}
-function stats(){
-  const map={};state.roster.forEach(n=>map[n]={name:n,games:0,w:0,l:0,gf:0,ga:0});
-  state.records.forEach(r=>{if(!map[r.attacker]) map[r.attacker]={name:r.attacker,games:0,w:0,l:0,gf:0,ga:0};const s=map[r.attacker];s.games++;s.gf+=r.for;s.ga+=r.against;if(r.for>r.against)s.w++;else if(r.for<r.against)s.l++});
-  return Object.values(map);
-}
-function renderStatus(){
-  const total=state.records.length,w=state.records.filter(r=>r.for>r.against).length,l=state.records.filter(r=>r.for<r.against).length;
-  $('#sGames').textContent=total;$('#sWins').textContent=w;$('#sLosses').textContent=l;$('#sRate').textContent=total?Math.round(w/total*100)+'%':'0%';
-  const ss=stats();$('#memberStats').innerHTML=ss.length?ss.map(s=>`<tr><td>${esc(s.name)}</td><td class="${s.games>3?'error':s.games===3?'ok':''}"><strong>${s.games}/3</strong></td><td>${Math.max(0,3-s.games)}</td><td>${s.w}-${s.l}</td><td>${s.gf}-${s.ga} (${s.gf-s.ga>=0?'+':''}${s.gf-s.ga})</td></tr>`).join(''):`<tr><td colspan="5" class="empty">명단을 먼저 저장하세요.</td></tr>`;
-}
-function renderOrder(){
-  const list=stats().filter(s=>s.games<3).sort((a,b)=>{const ar=a.games?a.w/a.games:.5,br=b.games?b.w/b.games:.5;return br-ar||a.games-b.games||a.name.localeCompare(b.name,'ko')});
-  $('#orderList').innerHTML=list.length?list.map((s,i)=>`<div class="order"><div class="rank">${i+1}</div><div><strong>${esc(s.name)}</strong><div class="muted">${s.w}승 ${s.l}패 · ${s.games?Math.round(s.w/s.games*100):'신규'}${s.games?'%':''}</div></div><div class="right"><strong>${3-s.games}회 남음</strong><div class="muted">개인 최대 3회</div></div><div class="right"><span class="pill ${s.games===0?'':'win'}">추천</span></div></div>`).join(''):`<div class="empty">공격 가능한 클럽원이 없습니다.</div>`;
-}
-function renderAll(){syncRosterUI();renderRecords();renderStatus();renderOrder()}
-$('#saveRoster').onclick=()=>{const names=[...new Set($('#rosterText').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];state.roster=names;save();renderAll();notice('#rosterNotice',`${names.length}명 저장 완료`)};
-$('#applyBatch').onclick=()=>{const {rows,errors}=parseRows($('#batchText').value);if(!rows.length)return notice('#batchNotice','반영할 수 있는 기록이 없습니다. 형식을 확인하세요.','err');addRecords(rows);notice('#batchNotice',`${rows.length}건 반영 완료${errors.length?` · 오류 행 ${errors.join(', ')}`:''}`,errors.length?'err':'ok')};
+const uid=()=>globalThis.crypto?.randomUUID?.()||('id-'+Date.now()+'-'+Math.random().toString(16).slice(2));
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&Array.isArray(x.roster)&&Array.isArray(x.records)?{...clone(emptyState),...x}:clone(emptyState)}catch{return clone(emptyState)}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function showNotice(sel,msg,type='ok'){const el=$(sel);el.className='notice show '+(type==='err'?'err':'ok');el.textContent=msg;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3500)}
+function result(gf,ga){return gf>ga?'승':gf<ga?'패':'무'}
+function normalizeRecord(x){return{id:x.id||uid(),attacker:String(x.attacker||'').trim(),opponent:String(x.opponent||'').trim(),for:Number(x.for),against:Number(x.against),at:x.at||Date.now()}}
+function parseRows(text){const rows=[],errors=[];text.split(/\r?\n/).forEach((line,i)=>{if(!line.trim())return;const parts=(line.includes('\t')?line.split('\t'):line.split(',')).map(v=>v.trim());if(parts.length<4){errors.push(i+1);return}const [attacker,opponent,forS,againstS]=parts;const gf=Number(forS),ga=Number(againstS);if(!attacker||!opponent||!Number.isInteger(gf)||!Number.isInteger(ga)||gf<0||ga<0){errors.push(i+1);return}rows.push(normalizeRecord({attacker,opponent,for:gf,against:ga,at:Date.now()+i}))});return{rows,errors}}
+function tabs(){document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tab,.page').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$('#'+btn.dataset.page).classList.add('active')})}
+function rosterOptions(value=''){return '<option value="">공격자 선택</option>'+state.roster.map(n=>`<option ${n===value?'selected':''} value="${esc(n)}">${esc(n)}</option>`).join('')}
+function renderRoster(){$('#rosterText').value=state.roster.join('\n')}
+function renderDraft(){const body=$('#draftBody');if(!state.draft.length){body.innerHTML='<tr><td colspan="7" class="empty">붙여넣기 후 검수표를 만들거나 빈 행을 추가하세요.</td></tr>';return}body.innerHTML=state.draft.map((r,i)=>`<tr data-id="${r.id}"><td>${i+1}</td><td><select class="draft-input d-attacker">${rosterOptions(r.attacker)}${r.attacker&&!state.roster.includes(r.attacker)?`<option selected value="${esc(r.attacker)}">${esc(r.attacker)}</option>`:''}</select></td><td><input class="input draft-input d-opponent" value="${esc(r.opponent)}"></td><td><input class="input d-for" type="number" min="0" value="${Number.isFinite(r.for)?r.for:''}"></td><td><input class="input d-against" type="number" min="0" value="${Number.isFinite(r.against)?r.against:''}"></td><td class="d-result">${Number.isFinite(r.for)&&Number.isFinite(r.against)?result(r.for,r.against):'-'}</td><td><button class="btn danger small d-del">삭제</button></td></tr>`).join('');body.querySelectorAll('tr').forEach(tr=>{const update=()=>{const id=tr.dataset.id,r=state.draft.find(x=>x.id===id);r.attacker=tr.querySelector('.d-attacker').value;r.opponent=tr.querySelector('.d-opponent').value.trim();r.for=Number(tr.querySelector('.d-for').value);r.against=Number(tr.querySelector('.d-against').value);tr.querySelector('.d-result').textContent=Number.isFinite(r.for)&&Number.isFinite(r.against)?result(r.for,r.against):'-'};tr.querySelectorAll('input,select').forEach(el=>{el.addEventListener('input',update);el.addEventListener('change',update)});tr.querySelector('.d-del').onclick=()=>{state.draft=state.draft.filter(x=>x.id!==tr.dataset.id);renderDraft()}})}
+function renderRecords(){const list=[...state.records].reverse();$('#recordsBody').innerHTML=list.length?list.map((r,i)=>`<tr><td>${state.records.length-i}</td><td>${esc(r.attacker)}</td><td>${esc(r.opponent)}</td><td>${r.for}-${r.against}</td><td><span class="pill ${result(r.for,r.against)==='승'?'win':result(r.for,r.against)==='패'?'loss':'draw'}">${result(r.for,r.against)}</span></td><td><button class="btn danger small rec-del" data-id="${r.id}">삭제</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">저장된 전적이 없습니다.</td></tr>';document.querySelectorAll('.rec-del').forEach(b=>b.onclick=()=>{state.records=state.records.filter(r=>r.id!==b.dataset.id);save();renderAll()});const w=state.records.filter(r=>r.for>r.against).length,l=state.records.filter(r=>r.for<r.against).length,d=state.records.length-w-l;$('#sAll').textContent=state.records.length;$('#sWin').textContent=w;$('#sLoss').textContent=l;$('#sDraw').textContent=d}
+function memberStats(){const map={};state.roster.forEach(name=>map[name]={name,games:0,w:0,l:0});state.records.forEach(r=>{if(!map[r.attacker])map[r.attacker]={name:r.attacker,games:0,w:0,l:0};map[r.attacker].games++;if(r.for>r.against)map[r.attacker].w++;else if(r.for<r.against)map[r.attacker].l++});return Object.values(map)}
+function renderOrder(){let list=memberStats();if(state.orderSort==='remaining')list.sort((a,b)=>(a.games-b.games)||((b.games?b.w/b.games:.5)-(a.games?a.w/a.games:.5))||a.name.localeCompare(b.name,'ko'));else list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));$('#orderGrid').innerHTML=list.length?list.map(s=>{const used=Math.min(s.games,3),over=Math.max(0,s.games-3),note=state.orderNotes[s.name]||{opponent:'',memo:''};const slots=[0,1,2].map(i=>`<span class="slot ${i<used?'used':''}"></span>`).join('')+(over?`<span class="slot over" title="초과 ${over}회"></span>`:'');return `<div class="member"><div class="member-top"><div><h3>${esc(s.name)}</h3><div class="muted">${s.w}승 ${s.l}패 · ${s.games}/3회</div></div><strong>${Math.max(0,3-s.games)}회 남음</strong></div><div class="slots">${slots}</div><div class="assignment"><input class="input o-opponent" data-name="${esc(s.name)}" placeholder="공격 상대" value="${esc(note.opponent)}"><input class="input o-memo" data-name="${esc(s.name)}" placeholder="메모" value="${esc(note.memo)}"><button class="btn ghost small o-save" data-name="${esc(s.name)}">저장</button></div></div>`}).join(''):'<div class="empty">명단을 먼저 저장하세요.</div>';document.querySelectorAll('.o-save').forEach(b=>b.onclick=()=>{const name=b.dataset.name,card=b.closest('.member');state.orderNotes[name]={opponent:card.querySelector('.o-opponent').value.trim(),memo:card.querySelector('.o-memo').value.trim()};save();b.textContent='완료';setTimeout(()=>b.textContent='저장',900)})}
+function renderAll(){renderRoster();renderDraft();renderRecords();renderOrder()}
+$('#saveRoster').onclick=()=>{state.roster=[...new Set($('#rosterText').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];save();renderAll();showNotice('#rosterNotice',`${state.roster.length}명 저장 완료`)};
+$('#makeDraft').onclick=()=>{const {rows,errors}=parseRows($('#batchText').value);if(!rows.length)return showNotice('#batchNotice','검수표로 만들 수 있는 기록이 없습니다. 형식을 확인하세요.','err');state.draft.push(...rows);renderDraft();showNotice('#batchNotice',`${rows.length}건 검수표 생성${errors.length?` · 오류 행 ${errors.join(', ')}`:''}`,errors.length?'err':'ok')};
+$('#addDraftRow').onclick=()=>{state.draft.push({id:uid(),attacker:'',opponent:'',for:NaN,against:NaN,at:Date.now()});renderDraft()};
+$('#saveDraft').onclick=()=>{const bad=state.draft.filter(r=>!r.attacker||!r.opponent||!Number.isInteger(r.for)||!Number.isInteger(r.against)||r.for<0||r.against<0);if(bad.length)return showNotice('#draftNotice',`${bad.length}개 행을 확인하세요. 공격자·상대·점수가 모두 필요합니다.`,'err');const existing=new Set(state.records.map(r=>[r.attacker,r.opponent,r.for,r.against].join('|')));let added=0,dupes=0;state.draft.forEach(r=>{const key=[r.attacker,r.opponent,r.for,r.against].join('|');if(existing.has(key)){dupes++;return}existing.add(key);state.records.push(normalizeRecord(r));added++});state.draft=[];save();renderAll();showNotice('#draftNotice',`${added}건 저장 완료${dupes?` · 중복 ${dupes}건 제외`:''}`)};
 $('#clearBatch').onclick=()=>$('#batchText').value='';
-$('#addManual').onclick=()=>{const attacker=$('#mAttacker').value,opponent=$('#mOpponent').value.trim(),gf=Number($('#mFor').value),ga=Number($('#mAgainst').value);if(!attacker||!opponent||!Number.isInteger(gf)||!Number.isInteger(ga)||gf<0||ga<0)return notice('#manualNotice','공격자·상대·점수를 모두 정확히 입력하세요.','err');addRecords([{id:crypto.randomUUID(),attacker,opponent,for:gf,against:ga,at:Date.now()}]);$('#mOpponent').value='';$('#mFor').value='';$('#mAgainst').value='';notice('#manualNotice','1건 반영 완료')};
-$('#clearRecords').onclick=()=>{if(confirm('전체 전적을 삭제할까요?')){state.records=[];save();renderAll()}};
-$('#images').onchange=e=>{const files=[...e.target.files];$('#thumbs').innerHTML='';files.forEach(f=>{const url=URL.createObjectURL(f);const d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${url}" alt=""><div>${esc(f.name)}</div>`;$('#thumbs').appendChild(d)})};
-$('#refreshOrder').onclick=renderOrder;
-$('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='club-order-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
-$('#importFile').onchange=async e=>{try{const x=JSON.parse(await e.target.files[0].text());if(!Array.isArray(x.roster)||!Array.isArray(x.records))throw new Error();state=x;save();renderAll();notice('#rosterNotice','백업 복원 완료')}catch{notice('#rosterNotice','올바른 백업 파일이 아닙니다.','err')}};
+$('#clearRecords').onclick=()=>{if(confirm('현재 매치 전적을 모두 삭제할까요?')){state.records=[];state.orderNotes={};save();renderAll()}};
+$('#autoOrder').onclick=()=>{state.orderSort=state.orderSort==='remaining'?'name':'remaining';save();renderOrder()};
+$('#images').onchange=e=>{imageUrls.forEach(URL.revokeObjectURL);imageUrls=[];const files=[...e.target.files];$('#thumbs').innerHTML='';files.forEach(f=>{const url=URL.createObjectURL(f);imageUrls.push(url);const d=document.createElement('div');d.className='thumb';d.innerHTML=`<img src="${url}" alt=""><div>${esc(f.name)}</div>`;$('#thumbs').appendChild(d)})};
+$('#clearImages').onclick=()=>{imageUrls.forEach(URL.revokeObjectURL);imageUrls=[];$('#thumbs').innerHTML='';$('#images').value=''};
+$('#exportData').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='club-order-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)};
+$('#importData').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;const x=JSON.parse(await f.text());if(!Array.isArray(x.roster)||!Array.isArray(x.records))throw new Error();state={...clone(emptyState),...x};save();renderAll();showNotice('#rosterNotice','백업 복원 완료')}catch{showNotice('#rosterNotice','올바른 백업 파일이 아닙니다.','err')}};
 tabs();renderAll();
 })();
 </script>
