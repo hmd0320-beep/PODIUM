@@ -2922,75 +2922,83 @@ function loadOcrImage(file){
 }
 function detectRosterLayout(img){
   const ratio=img.width/img.height;
-  // 컴프야 V26 전용 좌표. 이름 열과 "랭킹 챌린지 지난 시즌 순위" 열만 자른다.
-  // 다른 순위(실시간 매치/홈런 레이스), 순번, 팀 로고는 crop 밖으로 완전히 제외한다.
+  // 컴프야 V26 전용 행 좌표. 각 행에서 닉네임 영역과 랭킹챌린지 지난 시즌 순위 영역만 분리한다.
   if(ratio>0.42&&ratio<0.52){
     return [
       {
         name:'club-list',
-        nameX:.185,nameW:.330,
-        rankX:.540,rankW:.165,
-        y:.398,h:.515,
-        expectedRows:9
+        nameX:.198,nameW:.325,rankX:.548,rankW:.155,
+        rowStart:.405,rowPitch:.0557,rowH:.0435,rows:9
       },
       {
         name:'club-detail',
-        nameX:.105,nameW:.335,
-        rankX:.470,rankW:.145,
-        y:.455,h:.385,
-        expectedRows:7
+        nameX:.125,nameW:.315,rankX:.472,rankW:.145,
+        rowStart:.458,rowPitch:.0807,rowH:.061,rows:7
       }
     ];
   }
-  return [{name:'generic',nameX:.18,nameW:.34,rankX:.54,rankW:.17,y:.38,h:.52,expectedRows:9}];
+  return [{name:'generic',nameX:.20,nameW:.32,rankX:.55,rankW:.15,rowStart:.40,rowPitch:.057,rowH:.045,rows:9}];
 }
-function makeOcrCrop(img,p,mode){
+function makeRosterComposite(img,p,mode){
+  const scale=3.2,slotH=150,padY=22;
   const sx=Math.round((mode==='name'?p.nameX:p.rankX)*img.width);
   const sw=Math.round((mode==='name'?p.nameW:p.rankW)*img.width);
-  const sy=Math.round(p.y*img.height),sh=Math.round(p.h*img.height);
-  const scale=3.5,w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
-  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const outW=Math.max(420,Math.round(sw*scale));
+  const c=document.createElement('canvas');c.width=outW;c.height=p.rows*slotH;
   const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
-  const image=ctx.getImageData(0,0,w,h),d=image.data;
-  for(let i=0;i<d.length;i+=4){
-    const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-    let v;
-    if(mode==='rank'){
-      // 회색 셀의 흰 숫자만 검은 글자로 바꾸고 셀 배경/구분선은 제거한다.
-      v=g>158?0:255;
-    }else{
-      // 어두운 셀의 밝은 닉네임만 남긴다. 로고는 crop 좌측 밖이라 들어오지 않는다.
-      if(g>168) v=0;
-      else if(g>128) v=Math.round(255-(g-128)*6.2);
-      else v=255;
+  for(let row=0;row<p.rows;row++){
+    const sy=Math.round((p.rowStart+row*p.rowPitch)*img.height);
+    const sh=Math.round(p.rowH*img.height);
+    const temp=document.createElement('canvas');
+    temp.width=Math.max(1,Math.round(sw*scale));temp.height=Math.max(1,Math.round(sh*scale));
+    const tctx=temp.getContext('2d',{willReadFrequently:true});
+    tctx.imageSmoothingEnabled=true;tctx.imageSmoothingQuality='high';
+    tctx.drawImage(img,sx,sy,sw,sh,0,0,temp.width,temp.height);
+    const image=tctx.getImageData(0,0,temp.width,temp.height),d=image.data;
+    for(let i=0;i<d.length;i+=4){
+      const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+      let v;
+      if(mode==='rank'){
+        // 회색 배경의 밝은 순위 숫자만 남긴다.
+        v=g>150?0:255;
+      }else{
+        // 어두운 배경의 밝은 닉네임만 남긴다. 팀 로고와 순번은 crop 밖이다.
+        v=g>145?0:255;
+      }
+      d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;
     }
-    d[i]=d[i+1]=d[i+2]=Math.max(0,Math.min(255,v));d[i+3]=255;
+    tctx.putImageData(image,0,0);
+    const targetH=slotH-padY*2;
+    const targetW=Math.min(c.width-20,Math.round(temp.width*(targetH/temp.height)));
+    ctx.drawImage(temp,0,0,temp.width,temp.height,10,row*slotH+padY,targetW,targetH);
   }
-  ctx.putImageData(image,0,0);
-  return c;
+  return {canvas:c,slotH};
 }
-function ocrLines(out,mode){
-  const rawLines=out?.data?.lines||[];
-  const arr=rawLines.map((l,i)=>({
-    text:cleanOcrLine(l.text),confidence:Number(l.confidence)||0,
-    y:((Number(l.bbox?.y0)||0)+(Number(l.bbox?.y1)||0))/2,index:i,hasBox:!!l.bbox
-  })).filter(x=>x.text);
-  if(arr.length)return arr;
-  return String(out?.data?.text||'').split(/\n+/).map((text,i)=>({text:cleanOcrLine(text),confidence:Number(out?.data?.confidence)||0,y:i*100,index:i,hasBox:false})).filter(x=>x.text);
+function wordsByRosterSlot(out,rows,slotH){
+  const slots=Array.from({length:rows},()=>[]);
+  const words=Array.isArray(out?.data?.words)?out.data.words:[];
+  words.forEach(w=>{
+    const text=cleanOcrLine(w.text);if(!text)return;
+    const y=((Number(w.bbox?.y0)||0)+(Number(w.bbox?.y1)||0))/2;
+    const idx=Math.max(0,Math.min(rows-1,Math.floor(y/slotH)));
+    slots[idx].push({text,x:Number(w.bbox?.x0)||0,confidence:Number(w.confidence)||0});
+  });
+  return slots.map(parts=>{
+    parts.sort((a,b)=>a.x-b.x);
+    return {text:parts.map(x=>x.text).join(' ').trim(),confidence:parts.length?parts.reduce((s,x)=>s+x.confidence,0)/parts.length:0};
+  });
 }
 function cleanRecognizedName(text){
   let name=normalizeOcrName(text)
     .replace(/^(?:순위|클럽원정보|클럽원|정보)+/i,'')
     .replace(/(?:랭킹|챌린지|지난시즌|실시간|홈런레이스|순위)+$/i,'')
     .trim();
-  // 숫자/구두점만 있는 결과는 이름이 아니다. 한글·영문이 하나라도 있어야 한다.
   if(!/[A-Za-z가-힣]/.test(name)) return '';
   return name;
 }
 function strictRecognizedRank(text){
-  // 랭킹 열에서는 줄 전체가 숫자와 쉼표로 구성된 경우만 허용한다.
   let raw=String(text||'').replace(/\s+/g,'').replace(/[，.]/g,',');
   raw=raw.replace(/[OoQＤD]/g,'0').replace(/[Il|!]/g,'1').replace(/[Ss]/g,'5').replace(/[Bb]/g,'8');
   if(!/^[0-9,]{1,8}$/.test(raw)) return null;
@@ -2999,61 +3007,45 @@ function strictRecognizedRank(text){
   const n=Number(digits);
   return Number.isFinite(n)&&n>=0&&n<=999999?n:null;
 }
-function pairRosterColumns(nameOut,rankOut,kind){
+function pairRosterSlots(nameOut,rankOut,p,kind,nameSlotH,rankSlotH){
   const ignore=/(클럽|랭킹|챌린지|지난|시즌|실시간|홈런|순위|정보|평균|OVR|PODIUM|주력|친목)/i;
-  const names=ocrLines(nameOut,'name')
-    .map(x=>({...x,name:cleanRecognizedName(x.text)}))
-    .filter(x=>x.name&&!ignore.test(x.name));
-  const ranks=ocrLines(rankOut,'rank')
-    .map(x=>({...x,rank:strictRecognizedRank(x.text)}))
-    .filter(x=>x.rank!==null);
+  const nameSlots=wordsByRosterSlot(nameOut,p.rows,nameSlotH);
+  const rankSlots=wordsByRosterSlot(rankOut,p.rows,rankSlotH);
   const items=[];
-  const boxed=names.some(x=>x.hasBox)&&ranks.some(x=>x.hasBox);
-  if(!boxed){
-    const count=Math.min(names.length,ranks.length);
-    for(let i=0;i<count;i++){
-      const n=names[i],r=ranks[i];
-      const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
-      item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
-    }
-  }else{
-    const used=new Set();
-    const typicalRankGap=ranks.length>1?Math.abs(ranks[ranks.length-1].y-ranks[0].y)/(ranks.length-1):160;
-    for(const n of names){
-      let best=-1,bestDist=Infinity;
-      ranks.forEach((r,i)=>{if(used.has(i))return;const dist=Math.abs(r.y-n.y);if(dist<bestDist){bestDist=dist;best=i;}});
-      if(best<0||bestDist>Math.max(105,typicalRankGap*.62))continue;
-      const r=ranks[best];used.add(best);
-      const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
-      item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
-    }
+  for(let i=0;i<p.rows;i++){
+    const name=cleanRecognizedName(nameSlots[i]?.text||'');
+    const rank=strictRecognizedRank(rankSlots[i]?.text||'');
+    if(!name||ignore.test(name)||rank===null)continue;
+    const item=kind==='atk'?{name,power:rank}:{name,region:'잠실',power:rank,home:false};
+    item.confidence=Math.round(((nameSlots[i]?.confidence||0)+(rankSlots[i]?.confidence||0))/2);
+    item.row=i;
+    items.push(item);
   }
-  return items.filter((x,i,a)=>a.findIndex(y=>y.name.toLowerCase()===x.name.toLowerCase()&&y.power===x.power)===i);
+  return items;
 }
 function scoreRosterProfile(items,p){
-  const valid=items.filter(x=>/[A-Za-z가-힣]/.test(x.name)&&Number.isInteger(x.power)&&x.power>=0&&x.power<=999999);
-  const expected=Number(p.expectedRows)||9;
-  const countScore=Math.min(valid.length,expected)*20-Math.abs(valid.length-expected)*4;
-  const confidence=valid.reduce((s,x)=>s+(Number(x.confidence)||0),0)/Math.max(1,valid.length);
+  const expected=Number(p.rows)||9;
+  const countScore=Math.min(items.length,expected)*25-Math.abs(items.length-expected)*8;
+  const confidence=items.reduce((s,x)=>s+(Number(x.confidence)||0),0)/Math.max(1,items.length);
   return countScore+confidence;
 }
 async function recognizeRosterScreenshot(file,kind,statusEl,fileNo,totalFiles){
   const img=await loadOcrImage(file),profiles=detectRosterLayout(img);let best=[],bestScore=-Infinity;
   for(let pi=0;pi<profiles.length;pi++){
-    const p=profiles[pi],nameCanvas=makeOcrCrop(img,p,'name'),rankCanvas=makeOcrCrop(img,p,'rank');
+    const p=profiles[pi],nameComp=makeRosterComposite(img,p,'name'),rankComp=makeRosterComposite(img,p,'rank');
     const prefix=totalFiles>1?`${fileNo}/${totalFiles} · `:'';
-    const nameOut=await Tesseract.recognize(nameCanvas,'kor+eng',{
+    const nameOut=await Tesseract.recognize(nameComp.canvas,'kor+eng',{
       preserve_interword_spaces:'1',
       tessedit_pageseg_mode:'6',
-      logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}이름 열만 분석 중... ${Math.round((m.progress||0)*100)}%`;}
+      logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}각 행의 이름 칸만 분석 중... ${Math.round((m.progress||0)*100)}%`;}
     });
-    const rankOut=await Tesseract.recognize(rankCanvas,'eng',{
+    const rankOut=await Tesseract.recognize(rankComp.canvas,'eng',{
       tessedit_char_whitelist:'0123456789,',
       tessedit_pageseg_mode:'6',
       classify_bln_numeric_mode:'1',
-      logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}랭킹챌린지 지난 시즌 순위 열만 분석 중... ${Math.round((m.progress||0)*100)}%`;}
+      logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}각 행의 랭킹챌린지 지난 시즌 등수만 분석 중... ${Math.round((m.progress||0)*100)}%`;}
     });
-    const paired=pairRosterColumns(nameOut,rankOut,kind),score=scoreRosterProfile(paired,p);
+    const paired=pairRosterSlots(nameOut,rankOut,p,kind,nameComp.slotH,rankComp.slotH),score=scoreRosterProfile(paired,p);
     if(score>bestScore){bestScore=score;best=paired;}
   }
   return best;
