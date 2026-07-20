@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>클대 오더 MVP v2.2</title>
+<title>클대 오더 MVP v2.3</title>
 <style>
 :root{--bg:#090d14;--panel:#131a24;--panel2:#1a2330;--line:#2a3545;--text:#f5f7fa;--muted:#9aa7b8;--gold:#e0b75f;--green:#59d48d;--red:#ff7770;--blue:#76b6ff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}.app{max-width:1080px;margin:auto;padding:16px 12px 88px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.top h1{margin:0;font-size:21px}.top p{margin:4px 0 0;color:var(--muted);font-size:12px}.badge{border:1px solid #6d582c;color:var(--gold);border-radius:999px;padding:5px 9px;font-size:11px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:sticky;top:0;z-index:20;padding:6px 0 12px;background:linear-gradient(var(--bg) 80%,transparent)}.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 8px;border-radius:11px;font-weight:800}.tab.active{background:var(--gold);color:#17120a;border-color:var(--gold)}.page{display:none}.page.active{display:block}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:12px}.card h2{font-size:16px;margin:0 0 5px}.desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grow{flex:1}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:var(--gold);color:#17120a}.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.danger{background:#3b1d20;color:#ffaaa6;border:1px solid #6d3035}.small{font-size:12px;padding:7px 9px}.input,textarea,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.stat span{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:20px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{padding:9px 8px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}th{font-size:11px;color:var(--muted);background:#101620;position:sticky;top:0}.notice{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;font-size:12px}.notice.show{display:block}.notice.ok{background:#173522;border:1px solid #2f6b43}.notice.err{background:#3a1c1f;border:1px solid #6c3338}.pill{display:inline-block;border-radius:999px;padding:3px 7px;font-size:11px}.win{background:#183b27;color:#99e9b2}.loss{background:#412123;color:#ff9e98}.draw{background:#313744;color:#c7ced8}.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}.thumb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel2)}.thumb img{width:100%;height:160px;object-fit:cover;display:block}.thumb div{padding:7px;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file{display:none}.filelabel{display:inline-block}.order-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:9px}.member{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}.member-top{display:flex;justify-content:space-between;gap:8px}.member h3{font-size:14px;margin:0}.muted{color:var(--muted);font-size:12px}.slots{display:flex;gap:5px;margin:10px 0}.slot{width:24px;height:8px;border-radius:999px;background:#344052}.slot.used{background:var(--gold)}.slot.over{background:var(--red)}.assignment{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;margin-top:8px}.empty{text-align:center;color:var(--muted);padding:24px}.draft-input{min-width:120px}.hint{border-left:3px solid var(--blue);padding:9px 10px;background:#142033;border-radius:8px;font-size:12px;color:#cfe3ff}.toolbar{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
@@ -105,22 +105,40 @@ function pickName(text,isAttacker){let t=tidyName(text);if(!t)return{value:'',sc
  if(isAttacker&&state.roster.length){let best={value:'',score:0};for(const c of chunks.concat([t])){const m=matchRoster(c);if(m.score>best.score)best=m}return best.score>=52?best:{value:'',score:best.score}}
  return{value:chunks.join(' ').trim(),score:chunks.length?70:0}}
 function loadImage(file){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=URL.createObjectURL(file)})}
-function cropRowCanvas(img,rowIndex){const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
- const x=.085*w, width=.84*w, top=.392*h, step=.0713*h, rh=.061*h, y=top+rowIndex*step;
- const scale=2.4, c=document.createElement('canvas');c.width=Math.round(width*scale);c.height=Math.round(rh*scale);const ctx=c.getContext('2d',{willReadFrequently:true});
- ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,x,y,width,rh,0,0,c.width,c.height);
- const d=ctx.getImageData(0,0,c.width,c.height),a=d.data;for(let i=0;i<a.length;i+=4){const g=.299*a[i]+.587*a[i+1]+.114*a[i+2];const v=g>205?255:g<95?0:Math.max(0,Math.min(255,(g-95)*2.32));a[i]=a[i+1]=a[i+2]=v}ctx.putImageData(d,0,0);return c}
-function parseRowOcr(data,source,rowIndex){const words=(data.words||[]).filter(w=>String(w.text||'').trim()&&Number(w.confidence||0)>15);
- let left='',middle='',right='';if(words.length){const maxX=Math.max(...words.map(w=>(w.bbox?.x1||0)),1);for(const w of words){const cx=((w.bbox?.x0||0)+(w.bbox?.x1||0))/2/maxX;const tx=w.text+' ';if(cx<.39)left+=tx;else if(cx<.64)middle+=tx;else right+=tx}}
- else{const parts=String(data.text||'').trim().split(/\s{2,}|\n/).filter(Boolean);left=parts[0]||'';middle=parts.slice(1,-1).join(' ');right=parts.at(-1)||''}
- const all=[left,middle,right,data.text||''].join(' '), sc=scoreFromText(all);if(!sc)return null;
- const a=pickName(left,true),o=pickName(right,false);let confidence=Math.round(Math.min(98,(Number(data.confidence)||45)*.65+(a.value?18:0)+(o.value?12:0)+(sc?12:0)));
- return normalizeRecord({attacker:a.value,opponent:o.value,for:sc.for,against:sc.against,source:`${source} · ${rowIndex+1}행`,confidence,at:Date.now()+rowIndex})}
-let ocrWorker=null;
-async function getOcrWorker(logger){if(ocrWorker)return ocrWorker;if(!globalThis.Tesseract)throw new Error('OCR 엔진을 불러오지 못했습니다. 인터넷 연결을 확인하세요.');
- ocrWorker=await Tesseract.createWorker('kor+eng',1,{logger});await ocrWorker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});return ocrWorker}
-async function recognizeFile(file,index,total){const img=await loadImage(file);const rows=[];const worker=await getOcrWorker(m=>{if(m.status==='recognizing text'){const local=(m.progress||0)/6;setOcrProgress((index/total+local/total)*100,`${index+1}/${total} · 행 인식 중`)}});
- for(let r=0;r<6;r++){setOcrProgress(((index+(r/6))/total)*100,`${index+1}/${total} · ${r+1}/6행 판독`);const canvas=cropRowCanvas(img,r);const result=await worker.recognize(canvas);const row=parseRowOcr(result.data,file.name,r);if(row)rows.push(row)}
+function findBattleRows(img){
+ const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,c=document.createElement('canvas');
+ const sw=236,sh=Math.max(400,Math.round(h*sw/w));c.width=sw;c.height=sh;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,sw,sh);
+ const d=ctx.getImageData(0,0,sw,sh).data,x0=Math.round(sw*.025),x1=Math.round(sw*.975),from=Math.round(sh*.30),to=Math.round(sh*.76),scores=[];
+ for(let y=from;y<to;y++){let bright=0,total=0;for(let x=x0;x<x1;x+=2){const i=(y*sw+x)*4,lum=.299*d[i]+.587*d[i+1]+.114*d[i+2];if(lum>184)bright++;total++}scores[y]=bright/Math.max(1,total)}
+ const bands=[];let st=-1;for(let y=from;y<=to;y++){const on=y<to&&scores[y]>.63;if(on&&st<0)st=y;if(!on&&st>=0){if(y-st>Math.round(sh*.028))bands.push([st,y-1]);st=-1}}
+ const merged=[];for(const b of bands){if(merged.length&&b[0]-merged.at(-1)[1]<Math.round(sh*.012))merged.at(-1)[1]=b[1];else merged.push(b)}
+ let rows=merged.filter(b=>b[1]-b[0]>Math.round(sh*.035)).slice(0,6).map(b=>({y0:b[0]/sh*h,y1:b[1]/sh*h}));
+ if(rows.length<4){const top=.343*h,step=.0618*h,rh=.054*h;rows=Array.from({length:6},(_,i)=>({y0:top+i*step,y1:top+i*step+rh}))}
+ return rows;
+}
+function cropRegion(img,row,kind){const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+ const map={attacker:[.075,.39],score:[.365,.635],opponent:[.61,.925]},r=map[kind],padY=(row.y1-row.y0)*.08;
+ const sx=w*r[0],sy=Math.max(0,row.y0-padY),sw=w*(r[1]-r[0]),sh=Math.min(h-sy,(row.y1-row.y0)+padY*2),scale=kind==='score'?4:3;
+ const c=document.createElement('canvas');c.width=Math.round(sw*scale);c.height=Math.round(sh*scale);const ctx=c.getContext('2d',{willReadFrequently:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height);
+ const im=ctx.getImageData(0,0,c.width,c.height),a=im.data;for(let i=0;i<a.length;i+=4){const g=.299*a[i]+.587*a[i+1]+.114*a[i+2];let v;if(kind==='score')v=g>185?255:g<90?0:(g-90)*2.68;else v=g>218?255:g<105?0:(g-105)*2.25;a[i]=a[i+1]=a[i+2]=Math.max(0,Math.min(255,v))}ctx.putImageData(im,0,0);return c}
+function parseScoreOnly(text){const t=String(text||'').replace(/[Oo]/g,'0').replace(/[Il|]/g,'1').replace(/[—–~:：_=]/g,'-').replace(/[^0-9-]/g,'');const m=t.match(/(\d{1,2})-+(\d{1,2})/);if(m)return{for:+m[1],against:+m[2]};const nums=t.match(/\d{1,2}/g);return nums&&nums.length>=2?{for:+nums[0],against:+nums[1]}:null}
+function cleanOpponent(raw){return tidyName(raw).replace(/^PODIUM\s*/i,'').replace(/\s+/g,' ').trim()}
+let textWorker=null,digitWorker=null;
+async function getTextWorker(logger){if(textWorker)return textWorker;if(!globalThis.Tesseract)throw new Error('OCR 엔진을 불러오지 못했습니다. 인터넷 연결을 확인하세요.');textWorker=await Tesseract.createWorker('kor+eng',1,{logger});await textWorker.setParameters({tessedit_pageseg_mode:'7',preserve_interword_spaces:'1'});return textWorker}
+async function getDigitWorker(logger){if(digitWorker)return digitWorker;if(!globalThis.Tesseract)throw new Error('OCR 엔진을 불러오지 못했습니다. 인터넷 연결을 확인하세요.');digitWorker=await Tesseract.createWorker('eng',1,{logger});await digitWorker.setParameters({tessedit_pageseg_mode:'7',tessedit_char_whitelist:'0123456789-',preserve_interword_spaces:'0'});return digitWorker}
+async function recognizeFile(file,index,total){const img=await loadImage(file),rows=[],bands=findBattleRows(img);let task=0,totalTasks=bands.length*3;
+ const logger=m=>{if(m.status==='recognizing text'){const local=(task+(m.progress||0))/totalTasks;setOcrProgress((index/total+local/total)*100,`${index+1}/${total} · 전용 영역 판독 중`)}};
+ const tw=await getTextWorker(logger),dw=await getDigitWorker(logger);
+ for(let r=0;r<bands.length;r++){
+  setOcrProgress(((index+(r/bands.length))/total)*100,`${index+1}/${total} · ${r+1}/${bands.length}행 판독`);
+  task=r*3;const ar=await tw.recognize(cropRegion(img,bands[r],'attacker'));task++;
+  const sr=await dw.recognize(cropRegion(img,bands[r],'score'));task++;
+  const or=await tw.recognize(cropRegion(img,bands[r],'opponent'));task++;
+  const sc=parseScoreOnly(sr.data.text);if(!sc)continue;
+  const a=pickName(ar.data.text,true),op=cleanOpponent(or.data.text);const ac=Number(ar.data.confidence)||0,oc=Number(or.data.confidence)||0,dc=Number(sr.data.confidence)||0;
+  let confidence=Math.round(Math.min(99,dc*.48+ac*.22+oc*.15+(a.value?10:0)+(op?5:0)));if(sc.for>30||sc.against>30)confidence=Math.min(confidence,45);
+  rows.push(normalizeRecord({attacker:a.score>=58?a.value:'',opponent:op,for:sc.for,against:sc.against,source:`${file.name} · ${r+1}행`,confidence,at:Date.now()+r}));
+ }
  try{URL.revokeObjectURL(img.src)}catch{}return rows}
 function setOcrProgress(percent,text){$('#ocrBar').classList.add('show');$('#ocrProgress').style.width=Math.max(0,Math.min(100,percent))+'%';$('#ocrStatus').textContent=text||''}
 function tabs(){document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tab,.page').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$('#'+btn.dataset.page).classList.add('active')})}
