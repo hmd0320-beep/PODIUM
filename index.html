@@ -555,6 +555,11 @@ footer{
   .mobile-tab-panel{display:block!important}
 }
 
+
+.single-roster-grid{grid-template-columns:1fr!important}
+#clubRosterPanel .roster-table{min-width:680px}
+#clubRosterPanel{overflow-x:auto}
+@media(max-width:700px){#clubRosterPanel .scan{display:block}#clubRosterPanel .filebtn{display:block;text-align:center;padding:14px 12px;font-size:14px}.single-roster-grid{display:block}.single-roster-grid .panel{margin-bottom:14px}}
 </style>
 </head>
 <body>
@@ -632,23 +637,28 @@ footer{
 
 
   <div class="grid" style="margin-top:24px;">
-    <div class="panel">
-      <h2><span class="dot"></span>클럽원 관리</h2>
-      <div class="desc">클럽원은 최대 22명, 수비 배치는 최대 20명입니다. 20명을 초과한 미배치 인원은 공용 라인업 참여가 필요한 인원으로 자동 표시됩니다.</div>
+    <div class="panel" id="clubRosterPanel">
+      <h2><span class="dot"></span>우리 클럽</h2>
+      <div class="desc">이름·순위·수비 배치·공격 역할·개인 공격권을 한 곳에서 관리합니다.</div>
+      <div class="scan">
+        <label class="filebtn" for="atkFile">📷 지난 시즌 순위 스크린샷 선택</label>
+        <input type="file" id="atkFile" accept="image/*">
+        <span class="scanstatus" id="atkScanStatus">사진을 선택하면 이름과 지난 시즌 순위를 자동으로 인식합니다.</span>
+      </div>
       <div class="roster-summary" id="rosterSummary"></div>
       <table class="roster-table">
-        <thead><tr><th style="width:38%">이름</th><th>지난 시즌 순위</th><th>수비</th><th>상태</th><th></th></tr></thead>
+        <thead><tr><th style="width:25%">이름</th><th>순위</th><th>수비</th><th>공격 역할</th><th>개인 공격</th><th></th></tr></thead>
         <tbody id="memberBody"></tbody>
       </table>
       <button class="addbtn" id="addMember">+ 클럽원 추가 (최대 22명)</button>
       <div class="inline-actions">
         <button class="mini-btn" id="autoPlaceBtn">상위 20명 자동 수비 배치</button>
-        <button class="mini-btn" id="syncAttackersBtn">공격 명단에 반영</button>
+        <button class="mini-btn" id="resetAttackUsesBtn" type="button">개인 공격권 초기화</button>
       </div>
       <div class="limit-note">수비 미배치는 인원수만으로 고정하지 않고, 실제 수비 체크 여부를 기준으로 판별합니다.</div>
     </div>
 
-    <div class="panel panel-steel">
+    <div class="panel panel-steel" id="sharedLineupPanel">
       <h2><span class="dot" style="background:var(--steel)"></span>공용 라인업 6회</h2>
       <div class="desc">점수 획득용 본 공격과 분리하여 상대 전력 확인, 오버롤 감소, 수비 미배치 인원의 보상 참여를 기록합니다.</div>
       <table class="shared-table">
@@ -663,62 +673,11 @@ footer{
     </div>
   </div>
 
-  <section class="quick-entry" id="quickEntrySection">
-    <div class="quick-entry-head">
-      <div><h2>빠른 명단 입력</h2><p>여러 줄을 한 번에 붙여넣어 클럽원·공격수·상대 수비수를 등록합니다. 적용 전에 미리보기와 무결성 검사를 거칩니다.</p></div>
-      <button class="ghost" id="runIntegrityBtn" type="button">현재 데이터 검사</button>
-    </div>
-    <div class="quick-entry-grid">
-      <div class="quick-entry-card">
-        <h3>우리 클럽원 / 공격수</h3>
-        <div class="hint">한 줄에 <b>이름, 순위</b>. 쉼표·탭·공백을 지원합니다. 예: 준현 125</div>
-        <textarea id="quickOurInput" placeholder="준현 125
-민수 340
-철수 820"></textarea>
-      </div>
-      <div class="quick-entry-card">
-        <h3>상대 수비수</h3>
-        <div class="hint">지역 제목 아래 이름·순위를 입력하거나, 한 줄에 지역 이름 순위. 예: 잠실 / 상대A 210</div>
-        <textarea id="quickDefInput" placeholder="잠실
-상대A 210
-상대B 450
+  <div hidden aria-hidden="true"><table><tbody id="atkBody"></tbody></table><button id="addAtk" type="button"></button></div>
 
-부산 상대C 900"></textarea>
-      </div>
-    </div>
-    <div class="quick-entry-controls">
-      <select id="quickApplyMode"><option value="replace">기존 명단 교체</option><option value="merge">기존 명단에 합치기</option></select>
-      <label style="font-size:11.5px;color:var(--muted)"><input type="checkbox" id="quickSyncAttackers" checked> 클럽원을 공격 명단에도 반영</label>
-      <button class="ghost" id="quickPreviewBtn" type="button">미리보기</button>
-      <button class="cta" id="quickApplyBtn" type="button">검사 후 적용</button>
-      <button class="mini-ghost" id="quickClearBtn" type="button">입력칸 비우기</button>
-    </div>
-    <div class="quick-preview" id="quickPreview"></div>
-    <div class="integrity-box" id="integrityBox">
-      <div class="integrity-top"><div class="integrity-title">데이터 무결성</div><div class="integrity-score" id="integrityScore">대기</div></div>
-      <div class="integrity-list" id="integrityList"><div class="integrity-item">검사를 실행하면 중복 이름, 인원 제한, 순위·지역 누락, 공격권 범위를 확인합니다.</div></div>
-    </div>
-  </section>
-
-  <div class="grid">
-    <div class="panel">
-      <h2><span class="dot"></span>우리 공격 명단</h2>
-      <div class="desc">개인 공격권은 각자 3회입니다. 이미 사용한 횟수를 입력하면 남은 공격권만으로 오더를 추천합니다. 공용 라인업 6회와는 별도로 계산됩니다.</div>
-      <div class="scan">
-        <label class="filebtn" for="atkFile">📷 스크린샷 인식</label>
-        <input type="file" id="atkFile" accept="image/*">
-        <span class="scanstatus" id="atkScanStatus">캡처한 이미지를 올리면 이름·등수를 자동으로 채워요.</span>
-      </div>
-      <table>
-        <thead><tr><th style="width:36%">이름</th><th>등수</th><th>역할</th><th title="이미 사용한 개인 공격권">사용</th><th></th></tr></thead>
-        <tbody id="atkBody"></tbody>
-      </table>
-      <button class="addbtn" id="addAtk">+ 공격수 추가</button>
-      <button class="mini-btn" id="resetAttackUsesBtn" type="button" style="margin-top:10px">개인 공격권 사용 횟수 초기화</button>
-    </div>
-
-    <div class="panel panel-steel">
-      <h2><span class="dot" style="background:var(--steel)"></span>상대 수비 명단</h2>
+  <div class="grid single-roster-grid">
+    <div class="panel panel-steel" id="defenderRosterPanel">
+      <h2><span class="dot" style="background:var(--steel)"></span>상대 수비</h2>
       <div class="desc">상대 수비수의 이름·지역(잠실·수원·대구·부산·창원·광주·대전·인천·고척)·지난 시즌 순위·역할·홈구장 여부를 입력하세요. 에이스가 배치된 지역은 경기 점수가 6·4·2점으로 계산됩니다.</div>
       <div class="scan">
         <label class="filebtn" for="defFile">📷 스크린샷 인식</label>
@@ -736,9 +695,7 @@ footer{
       </table>
       <button class="addbtn" id="addDef">+ 수비수 추가</button>
       <div class="region-summary" id="regionSummary"></div>
-      <div class="tactical-panel" id="tacticalPanel"></div>
-      <div class="battle-timeline" id="battleTimeline"></div>
-      <div class="region-note">원본 전장 화면처럼 9개 구장을 둘레에 배치했습니다. 구장을 누르면 수비수와 점령 진행도를 확인할 수 있습니다.</div>
+      <div hidden><div class="tactical-panel" id="tacticalPanel"></div><div class="battle-timeline" id="battleTimeline"></div></div>
     </div>
   </div>
 
@@ -1288,6 +1245,7 @@ async function loadState(){
     const n = parseInt(String(r.id).replace('r',''),10);
     if(!isNaN(n) && n >= idSeq) idSeq = n+1;
   });
+  syncRosterAttackers();
   renderMembers();
   renderSharedLineup();
   renderAtk();
@@ -1344,6 +1302,24 @@ function memberStatus(member){
   return {label:'미배치', cls:'unplaced'};
 }
 function getFilledMembers(){ return clubMembers.filter(m=>m.name.trim()); }
+function getAttackerForMember(member){
+  const name=String(member?.name||'').trim();
+  return name?attackers.find(a=>String(a.name||'').trim()===name):null;
+}
+function ensureAttackerForMember(member, previousName=''){
+  const name=String(member?.name||'').trim();
+  let row=previousName?attackers.find(a=>String(a.name||'').trim()===String(previousName).trim()):null;
+  if(!row&&name) row=attackers.find(a=>String(a.name||'').trim()===name);
+  if(!name){ if(row) attackers=attackers.filter(a=>a.id!==row.id); return null; }
+  if(!row){ row={id:newId(),name,power:Number(member.power)||0,role:'normal',usedAttacks:0}; attackers.push(row); }
+  row.name=name; row.power=Number(member.power)||0; row.role=row.role||'normal'; row.usedAttacks=Math.max(0,Math.min(3,Number(row.usedAttacks)||0));
+  return row;
+}
+function syncRosterAttackers(){
+  const names=new Set();
+  clubMembers.forEach(m=>{ const name=String(m.name||'').trim(); if(name){ names.add(name); ensureAttackerForMember(m); } });
+  attackers=attackers.filter(a=>names.has(String(a.name||'').trim()));
+}
 function renderMembers(){
   const body=document.getElementById('memberBody');
   body.innerHTML='';
@@ -1353,8 +1329,9 @@ function renderMembers(){
     tr.innerHTML=`
       <td><input type="text" placeholder="클럽원 이름" value="${escapeHtml(m.name)}" data-mid="${m.id}" data-mfield="name"></td>
       <td><input type="number" placeholder="순위" value="${m.power||''}" data-mid="${m.id}" data-mfield="power"></td>
-      <td style="text-align:center"><input type="checkbox" class="chk" ${m.defense?'checked':''} data-mid="${m.id}" data-mfield="defense"></td>
-      <td><span class="role-tag ${st.cls}">${st.label}</span></td>
+      <td style="text-align:center"><input type="checkbox" class="chk" ${m.defense?'checked':''} data-mid="${m.id}" data-mfield="defense" title="${st.label}"></td>
+      <td><select class="role-select" data-mid="${m.id}" data-afield="role">${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.role||'normal')===k?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td><select class="progress-select" data-mid="${m.id}" data-afield="usedAttacks"><option value="0" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===0?'selected':''}>0/3</option><option value="1" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===1?'selected':''}>1/3</option><option value="2" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===2?'selected':''}>2/3</option><option value="3" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===3?'selected':''}>3/3</option></select></td>
       <td><button class="rowbtn" data-mid="${m.id}" data-maction="delete">✕</button></td>`;
     body.appendChild(tr);
   });
@@ -1415,20 +1392,29 @@ function renderSharedStatus(){
 }
 
 document.getElementById('memberBody').addEventListener('input',e=>{
-  const id=e.target.dataset.mid,field=e.target.dataset.mfield;if(!id)return;
+  const id=e.target.dataset.mid;if(!id)return;
   const m=clubMembers.find(x=>x.id===id);if(!m)return;
+  const field=e.target.dataset.mfield, afield=e.target.dataset.afield;
+  if(afield){
+    const a=ensureAttackerForMember(m);
+    if(!a){ alert('먼저 클럽원 이름을 입력해주세요.'); renderMembers(); return; }
+    a[afield]=afield==='usedAttacks'?Math.max(0,Math.min(3,Number(e.target.value)||0)):e.target.value;
+    updateRecommendationReadiness(); scheduleSave(); return;
+  }
   if(field==='defense'){
     if(e.target.checked){
       const placed=getFilledMembers().filter(x=>x.defense&&x.id!==id).length;
       if(placed>=20){ e.target.checked=false; alert('수비는 최대 20명까지 배치할 수 있습니다.'); return; }
       m.defense=true;
     }else m.defense=false;
-  }else m[field]=field==='power'?Number(e.target.value)||0:e.target.value;
-  renderMembers(); renderSharedLineup(); scheduleSave();
+  }else if(field==='name'){
+    const previousName=m.name; m.name=e.target.value; ensureAttackerForMember(m,previousName);
+  }else if(field==='power'){ m.power=Number(e.target.value)||0; ensureAttackerForMember(m); }
+  renderMembers(); renderSharedLineup(); updateRecommendationReadiness(); scheduleSave();
 });
 document.getElementById('memberBody').addEventListener('click',e=>{
   if(e.target.dataset.maction!=='delete')return;
-  const id=e.target.dataset.mid; clubMembers=clubMembers.filter(m=>m.id!==id);
+  const id=e.target.dataset.mid; const removed=clubMembers.find(m=>m.id===id); clubMembers=clubMembers.filter(m=>m.id!==id); if(removed) attackers=attackers.filter(a=>String(a.name||'').trim()!==String(removed.name||'').trim());
   sharedLineup.forEach(s=>{if(s.memberId===id)s.memberId='';});
   renderMembers();renderSharedLineup();scheduleSave();
 });
@@ -1442,13 +1428,6 @@ document.getElementById('autoPlaceBtn').addEventListener('click',()=>{
   const top=new Set(filled.slice(0,20).map(m=>m.id));
   clubMembers.forEach(m=>m.defense=m.name.trim()?top.has(m.id):false);
   renderMembers();renderSharedLineup();scheduleSave();
-});
-document.getElementById('syncAttackersBtn').addEventListener('click',()=>{
-  {
-  const oldByName=new Map(attackers.filter(a=>a.name.trim()).map(a=>[a.name.trim(),a]));
-  attackers=getFilledMembers().map(m=>{const old=oldByName.get(m.name.trim());return {id:newId(),name:m.name,power:m.power||0,role:old?.role||'normal',usedAttacks:Math.max(0,Math.min(3,Number(old?.usedAttacks)||0))};});
-  }
-  renderAtk();scheduleSave();alert(`${attackers.length}명을 우리 공격 명단에 반영했습니다.`);
 });
 document.getElementById('sharedBody').addEventListener('input',e=>{
   let i;
@@ -2803,9 +2782,11 @@ async function scanImage(file, kind){
     const items=parseRosterOcrText(raw,kind);
     if(!items.length) throw new Error('이름과 지난 시즌 순위를 찾지 못했습니다');
     if(kind==='atk'){
-      attackers=attackers.filter(r=>r.name.trim()!=='');
-      items.forEach(it=>attackers.push({id:newId(),name:String(it.name),power:Number(it.power)||0,role:'normal',usedAttacks:0}));
-      renderAtk();
+      const oldMembers=new Map(clubMembers.filter(m=>String(m.name||'').trim()).map(m=>[String(m.name).trim(),m]));
+      const oldAttackers=new Map(attackers.filter(a=>String(a.name||'').trim()).map(a=>[String(a.name).trim(),a]));
+      clubMembers=items.slice(0,22).map((it,i)=>{const name=String(it.name).trim(),old=oldMembers.get(name);return {id:old?.id||newId(),name,power:Number(it.power)||0,defense:old?!!old.defense:i<20};});
+      attackers=clubMembers.map(m=>{const old=oldAttackers.get(m.name);return {id:old?.id||newId(),name:m.name,power:m.power,role:old?.role||'normal',usedAttacks:Math.max(0,Math.min(3,Number(old?.usedAttacks)||0))};});
+      renderMembers(); renderSharedLineup(); renderAtk(); updateRecommendationReadiness();
     }else{
       defenders=defenders.filter(r=>r.name.trim()!=='');
       items.forEach(it=>defenders.push({id:newId(),name:String(it.name),region:normalizeRegion(it.region),power:Number(it.power)||0,role:'normal',hidden:false,progress:0,home:false}));
@@ -3444,8 +3425,8 @@ function applyQuickEntry(){
 
 const USAGE_STORAGE_KEY='podium_usage_v1';
 const USAGE_ACTIONS={
-  addMember:'클럽원 추가',autoPlaceBtn:'수비 자동 배치',syncAttackersBtn:'공격수 동기화',recommendSharedBtn:'공용 라인업 추천',
-  quickApplyBtn:'빠른 일괄 입력 적용',addAtk:'공격수 추가',resetAttackUsesBtn:'개인 공격권 초기화',addDef:'수비수 추가',
+  addMember:'클럽원 추가',autoPlaceBtn:'수비 자동 배치',recommendSharedBtn:'공용 라인업 추천',
+  resetAttackUsesBtn:'개인 공격권 초기화',addDef:'수비수 추가',
   calcBtn:'AI 추천 생성',fillPredictedBtn:'예측 결과 채우기',clearResultsBtn:'추천 결과 초기화',saveResultBtn:'AI 결과 저장',
   addManualRow:'수동 기록 행 추가',saveManualRecord:'수동 기록 저장',saveBattleImport:'OCR 기록 저장',exportCsv:'CSV 내보내기',
   exportJson:'JSON 백업',startSimulationBtn:'체험 데이터 시작',restoreSimulationBtn:'원래 데이터 복원',makeSnapshotBtn:'복구 지점 만들기',
@@ -3521,7 +3502,7 @@ loadState().then(()=>{ restoreActiveOrderSession(); updateRecommendationReadines
   };
   makePanel('home','홈','현재 상황');
   makePanel('battle','클럽대전 현황','추천 · 기록 · 운영');
-  makePanel('roster','명단','클럽원 · 공격수 · 상대 수비');
+  makePanel('roster','명단','우리 클럽 · 상대 수비 · 사진 인식');
   makePanel('report','리포트','전적 · 시즌 분석');
   makePanel('settings','설정','백업 · 복구 · 진단');
 
@@ -3572,6 +3553,8 @@ loadState().then(()=>{ restoreActiveOrderSession(); updateRecommendationReadines
     if(el.classList?.contains('grid')||el.id==='quickEntrySection')return move(el,panels.roster);
     move(el,panels.settings);
   });
+  const sharedPanel=document.getElementById('sharedLineupPanel');
+  if(sharedPanel) move(sharedPanel,panels.battle);
   move(footer,panels.settings);
 
   const nav=document.createElement('nav');
