@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PODIUM · 클럽대전 오더</title>
+<title>PODIUM · 클럽대전 오더 v0.9.6</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -906,7 +906,7 @@ footer{
         <div class="desc" style="margin:5px 0 0">게임의 대전 기록 화면을 올리면 날짜·총점·경기별 스코어를 읽고, 양쪽의 공용 라인업 마크를 찾아 자동 구분합니다. 인식 결과는 직접 수정할 수 있습니다.</div>
       </div>
       <label class="ghost" for="battleFile" style="cursor:pointer;">📷 대전기록 불러오기</label>
-      <input type="file" id="battleFile" accept="image/*" style="display:none">
+      <input type="file" id="battleFile" accept="image/*" multiple style="display:none">
     </div>
     <div class="scanstatus" id="battleScanStatus">캡처 이미지를 선택해주세요.</div>
     <div class="ocr-progress"><span id="battleProgress"></span></div>
@@ -2574,8 +2574,24 @@ function refreshManualPreviewFromDom(){
     if(!row)return;
     const previousType=row.attackType;
     row[el.dataset.mf]=el.value;
-    if(el.dataset.mf==='attackType'&&previousType!==el.value) row.attackerId='';
-    requestAnimationFrame(()=>renderManualRows());
+    // iOS Safari에서는 select 변경 직후 tbody 전체를 다시 그리면
+    // 방금 고른 값이 이전 값으로 되돌아가는 경우가 있다.
+    // 공격 종류가 바뀌어 공격수 목록 자체가 달라질 때만 다시 그린다.
+    if(el.dataset.mf==='attackType'&&previousType!==el.value){
+      row.attackerId='';
+      renderManualRows();
+    }else{
+      const preview=calculateManualPreview();
+      const idx=manualRows.findIndex(x=>x.id===row.id);
+      const pr=preview.rows[idx];
+      const tr=el.closest('tr');
+      const point=tr?.querySelector('.point-preview');
+      if(point){point.textContent=pr?.points?`+${pr.points}점`:'0점';point.classList.toggle('zero',!pr?.points);}
+      const wins=preview.rows.filter(r=>r.actual==='win'&&r.attackerId&&r.defenderId).length;
+      const losses=preview.rows.filter(r=>r.actual==='loss'&&r.attackerId&&r.defenderId).length;
+      const summary=document.getElementById('manualSummary');
+      if(summary) summary.innerHTML=`<span class="quick-pill"><strong>${wins}</strong>승</span><span class="quick-pill"><strong>${losses}</strong>패</span><span class="quick-pill good">예상 반영 <strong>${preview.total}점</strong></span><span class="quick-pill">점령 <strong>${preview.bonuses.length}지역</strong></span>`;
+    }
   });
 });
 document.getElementById('manualRows')?.addEventListener('click',e=>{
@@ -3312,6 +3328,60 @@ function parseBattleOcr(text){
   });
   return {date,match,total,opponent:'',rows};
 }
+
+function cleanBattleName(v){
+  return String(v||'')
+    .replace(/\b(?:승|패|무|PODIUM|풀카운트)\b/gi,' ')
+    .replace(/[\[\]{}()<>|/\\]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function parseBattleOcrData(data){
+  const words=(Array.isArray(data?.words)?data.words:[])
+    .filter(w=>String(w.text||'').trim()&&w.bbox)
+    .map(w=>({text:String(w.text).trim(),x0:w.bbox.x0,x1:w.bbox.x1,y0:w.bbox.y0,y1:w.bbox.y1,cx:(w.bbox.x0+w.bbox.x1)/2,cy:(w.bbox.y0+w.bbox.y1)/2}));
+  if(!words.length)return parseBattleOcr(data?.text||'');
+  const width=Math.max(...words.map(w=>w.x1),1),height=Math.max(...words.map(w=>w.y1),1);
+  const body=words.filter(w=>w.cy>height*.36);
+  const groups=[];
+  body.sort((a,b)=>a.cy-b.cy||a.x0-b.x0).forEach(w=>{
+    let g=groups.find(g=>Math.abs(g.cy-w.cy)<=Math.max(16,(w.y1-w.y0)*.75));
+    if(!g){g={cy:w.cy,words:[]};groups.push(g);}g.words.push(w);g.cy=g.words.reduce((s,x)=>s+x.cy,0)/g.words.length;
+  });
+  const rows=[];
+  groups.sort((a,b)=>a.cy-b.cy).forEach(g=>{
+    const ws=g.words.sort((a,b)=>a.x0-b.x0);
+    const nums=ws.filter(w=>/^\d{1,3}$/.test(w.text) && w.cx>width*.30 && w.cx<width*.70);
+    if(nums.length<2)return;
+    let pair=null,best=1e9;
+    for(let i=0;i<nums.length;i++)for(let j=i+1;j<nums.length;j++){
+      const mid=(nums[i].cx+nums[j].cx)/2,dist=Math.abs(mid-width*.5)+Math.abs((nums[j].cx-nums[i].cx)-width*.11);
+      if(dist<best){best=dist;pair=[nums[i],nums[j]];}
+    }
+    if(!pair)return;
+    const [n1,n2]=pair.sort((a,b)=>a.x0-b.x0),a=Number(n1.text),b=Number(n2.text);
+    const leftRaw=ws.filter(w=>w.x1<n1.x0-width*.015).map(w=>w.text).join(' ');
+    const rightRaw=ws.filter(w=>w.x0>n2.x1+width*.015).map(w=>w.text).join(' ');
+    let left=cleanBattleName(leftRaw),right=cleanBattleName(rightRaw);
+    if(!left&&!right)return;
+    const shared=/PODIUM/i.test(leftRaw)||/PODIUM/i.test(rightRaw);
+    if(shared){
+      left=cleanBattleName(leftRaw.replace(/PODIUM/gi,' '));
+      right=cleanBattleName(rightRaw.replace(/PODIUM/gi,' '));
+    }
+    const am=resolveOcrMember(left,attackers),dm=resolveOcrMember(right,defenders);
+    rows.push({id:'br'+Date.now()+Math.random(),ours:am?.name||left||'미인식',theirs:dm?.name||right||'미인식',attackerId:am?.id||'',defenderId:dm?.id||'',ourScore:a,theirScore:b,result:a>b?'win':a<b?'loss':'draw',type:shared?'shared':'normal',ocrConfidence:(am?1:.45)+(dm?1:.45)});
+  });
+  // 인접 OCR 군집이 같은 실제 경기행을 중복으로 만든 경우 제거
+  const seen=new Set(),dedup=[];
+  rows.forEach(r=>{const k=[normalizeMemberName(r.ours),normalizeMemberName(r.theirs),r.ourScore,r.theirScore].join('|');if(!seen.has(k)){seen.add(k);dedup.push(r);}});
+  const base=parseBattleOcr(data?.text||'');
+  return {...base,rows:dedup.length?dedup:base.rows};
+}
+function mergeBattleRows(existing,incoming){
+  const out=[...existing],seen=new Set(existing.map(r=>[normalizeMemberName(r.ours),normalizeMemberName(r.theirs),r.ourScore,r.theirScore].join('|')));
+  incoming.forEach(r=>{const k=[normalizeMemberName(r.ours),normalizeMemberName(r.theirs),r.ourScore,r.theirScore].join('|');if(!seen.has(k)){seen.add(k);out.push(r);}});
+  return out;
+}
 function renderBattleRows(){
   const body=document.getElementById('battleRows');
   if(!currentBattleRows.length){body.innerHTML='<tr><td colspan="7" class="empty">아직 인식된 기록이 없습니다.</td></tr>';return;}
@@ -3352,37 +3422,53 @@ document.getElementById('battleRows').addEventListener('click',e=>{if(e.target.d
 document.getElementById('addBattleRow').addEventListener('click',()=>{currentBattleRows.push({id:'br'+Date.now(),ours:'',theirs:'',attackerId:'',defenderId:'',ourScore:0,theirScore:0,result:'draw',type:'unknown'});renderBattleRows();});
 document.getElementById('clearBattleImport').addEventListener('click',resetBattleImport);
 document.getElementById('battleFile').addEventListener('change',async e=>{
-  const file=e.target.files[0]; e.target.value=''; if(!file)return;
+  const files=[...e.target.files]; e.target.value=''; if(!files.length)return;
   const status=document.getElementById('battleScanStatus'),bar=document.getElementById('battleProgress');
   if(!window.Tesseract){status.textContent='OCR 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해주세요.';status.className='scanstatus err';return;}
-  status.className='scanstatus';status.textContent='한글 OCR 준비 중...';bar.style.width='3%';
+  status.className='scanstatus';bar.style.width='2%';
+  let merged=[...currentBattleRows],rawParts=[document.getElementById('battleRaw').value].filter(Boolean),meta={date:document.getElementById('battleDate').value,match:document.getElementById('battleMatch').value,total:document.getElementById('battleTotal').value},sharedCount=currentBattleRows.filter(r=>r.type==='shared').length;
   try{
-    const out=await Tesseract.recognize(file,'kor+eng',{logger:m=>{if(m.status==='recognizing text'){const pct=Math.round((m.progress||0)*100);bar.style.width=pct+'%';status.textContent=`이미지 분석 중... ${pct}%`;}}});
-    const raw=out.data.text||''; document.getElementById('battleRaw').value=raw;
-    const parsed=parseBattleOcr(raw);
-    document.getElementById('battleDate').value=parsed.date;
-    document.getElementById('battleMatch').value=parsed.match;
-    document.getElementById('battleTotal').value=parsed.total;
-    currentBattleRows=parsed.rows;
-    status.textContent='공용 라인업 마크 확인 중...';
-    const scoreYs=getScoreLineYs(out.data);
-    try{
-      const iconRows=await detectSharedIconRows(file,scoreYs.slice(-currentBattleRows.length));
-      currentBattleRows.forEach((r,i)=>{
-        const hit=iconRows[i];
-        if(hit&&hit.shared){r.type='shared';r.iconDetected=true;r.iconConfidence=hit.confidence;}
-        else if(hit){r.iconDetected=false;r.iconConfidence=hit.confidence;}
-      });
-    }catch(iconErr){console.warn('공용 마크 탐지 실패',iconErr);}
-    renderBattleRows();
-    const sharedCount=currentBattleRows.filter(r=>r.type==='shared').length;
-    bar.style.width='100%';status.className='scanstatus ok';status.textContent=`${currentBattleRows.length}개 경기 인식 완료 · 공용 라인업 ${sharedCount}건 자동 구분. 이름과 결과를 확인해주세요.`;
-  }catch(err){status.className='scanstatus err';status.textContent='인식 실패: '+err.message;}
+    for(let i=0;i<files.length;i++){
+      const file=files[i],prefix=files.length>1?`[${i+1}/${files.length}] `:'';
+      const out=await Tesseract.recognize(file,'kor+eng',{logger:m=>{
+        if(m.status==='recognizing text'){
+          const local=Math.round((m.progress||0)*100),overall=Math.round(((i+(m.progress||0))/files.length)*100);
+          bar.style.width=Math.max(3,overall)+'%';status.textContent=`${prefix}경기행 전체 인식 중... ${local}%`;
+        }
+      }});
+      rawParts.push(`===== ${file.name} =====\n${out.data.text||''}`);
+      const parsed=parseBattleOcrData(out.data);
+      meta.date=meta.date||parsed.date;meta.match=meta.match||parsed.match;meta.total=meta.total||parsed.total;
+      const scoreYs=getScoreLineYs(out.data);
+      try{
+        const iconRows=await detectSharedIconRows(file,scoreYs.slice(-parsed.rows.length));
+        parsed.rows.forEach((r,idx)=>{const hit=iconRows[idx];if(hit?.shared){r.type='shared';r.iconDetected=true;r.iconConfidence=hit.confidence;sharedCount++;}});
+      }catch(iconErr){console.warn('공용 마크 탐지 실패',iconErr);}
+      merged=mergeBattleRows(merged,parsed.rows);
+      currentBattleRows=merged;renderBattleRows();
+    }
+    document.getElementById('battleRaw').value=rawParts.join('\n\n');
+    if(meta.date)document.getElementById('battleDate').value=meta.date;
+    if(meta.match)document.getElementById('battleMatch').value=meta.match;
+    if(meta.total)document.getElementById('battleTotal').value=meta.total;
+    currentBattleRows=merged;renderBattleRows();bar.style.width='100%';status.className='scanstatus ok';
+    status.textContent=`이번 ${files.length}장 추가 인식 완료 · 누적 ${merged.length}개 경기 · 공용 ${currentBattleRows.filter(r=>r.type==='shared').length}건. 다른 캡처를 다시 선택해도 기존 결과에 이어 붙습니다.`;
+  }catch(err){status.className='scanstatus err';status.textContent='인식 실패: '+(err?.message||err);}
 });
 document.getElementById('saveBattleImport').addEventListener('click',()=>{
+  // 저장 직전 화면에 보이는 모든 select/input 값을 다시 읽는다.
+  // 모바일 Safari에서 change 이벤트가 누락돼도 현재 화면값이 저장되도록 한다.
+  document.querySelectorAll('#battleRows [data-bid][data-bfield]').forEach(el=>{
+    const r=currentBattleRows.find(x=>x.id===el.dataset.bid);if(!r)return;
+    const f=el.dataset.bfield;
+    r[f]=(f==='ourScore'||f==='theirScore')?(Number(el.value)||0):el.value;
+    if(f==='attackerId'){const a=attackers.find(x=>x.id===r.attackerId);if(a)r.ours=a.name;}
+    if(f==='defenderId'){const d=defenders.find(x=>x.id===r.defenderId);if(d)r.theirs=d.name;}
+    r.result=r.ourScore>r.theirScore?'win':r.ourScore<r.theirScore?'loss':'draw';
+  });
   if(!currentBattleRows.length){alert('저장할 경기 기록이 없습니다.');return;}
   const rec={id:'bi'+Date.now(),date:document.getElementById('battleDate').value,match:document.getElementById('battleMatch').value,opponentClub:document.getElementById('battleOpponent').value.trim()||document.getElementById('manualOpponent')?.value.trim()||document.getElementById('opponentClub')?.value.trim()||'미지정',total:document.getElementById('battleTotal').value,rows:currentBattleRows.map(r=>({...r}))};
-  const normal=rec.rows.filter(r=>r.type==='normal'&&(r.result==='win'||r.result==='loss'));
+  const normal=rec.rows.filter(r=>(r.type==='normal'||r.type==='shared')&&(r.result==='win'||r.result==='loss'));
   const unresolved=normal.filter(r=>!r.attackerId||!r.defenderId);
   if(unresolved.length&&!confirm(`${unresolved.length}경기의 공격수 또는 수비수가 확인되지 않았습니다. 미확인 경기는 전적만 보관하고 공격권·점령 진행도에는 반영하지 않을까요?`))return;
   battleImports.unshift(rec);
@@ -3396,9 +3482,11 @@ document.getElementById('saveBattleImport').addEventListener('click',()=>{
       if(d&&r.result==='win'){
         const stages=getRegionStagePoints(d.region||'미지정');points=stages[Math.min(2,stageBefore)]||0;progress.set(d.id,Math.min(3,stageBefore+1));
       }
-      const before=a?(Number(a.usedAttacks)||0)+(useCursor.get(a.id)||0):0;
-      if(a)useCursor.set(a.id,(useCursor.get(a.id)||0)+1);
-      entries.push({attacker:a?.name||r.ours||'미인식',attackerId:a?.id||'',defender:d?.name||r.theirs||'미인식',defenderId:d?.id||'',defenderPower:Number(d?.power)||0,home:!!d?.home,region:d?.region||'미지정',attackerPower:Number(a?.power)||0,predicted:'unknown',actual:r.result,points,stageBefore,stageAfter:d&&r.result==='win'?Math.min(3,stageBefore+1):stageBefore,attackUseBefore:before,attackUseAfter:a?before+1:before,score:`${r.ourScore}-${r.theirScore}`});
+      const shared=r.type==='shared';
+      const before=shared?null:(a?(Number(a.usedAttacks)||0)+(useCursor.get(a.id)||0):0);
+      if(a&&!shared)useCursor.set(a.id,(useCursor.get(a.id)||0)+1);
+      if(a&&shared){const slot=sharedLineup.find(s=>!s.done);if(slot){slot.memberId=a.id;slot.target=d?.name||r.theirs||'';slot.done=true;}}
+      entries.push({attacker:a?.name||r.ours||'미인식',attackerId:a?.id||'',defender:d?.name||r.theirs||'미인식',defenderId:d?.id||'',defenderPower:Number(d?.power)||0,home:!!d?.home,region:d?.region||'미지정',attackerPower:Number(a?.power)||0,predicted:'unknown',actual:r.result,points,stageBefore,stageAfter:d&&r.result==='win'?Math.min(3,stageBefore+1):stageBefore,attackType:shared?'shared':'personal',shared,attackUseBefore:before,attackUseAfter:shared?null:(a?before+1:before),score:`${r.ourScore}-${r.theirScore}`});
     });
     useCursor.forEach((add,id)=>{const a=attackers.find(x=>x.id===id);if(a)a.usedAttacks=Math.min(3,(Number(a.usedAttacks)||0)+add);});
     defenders.forEach(d=>{if(progress.has(d.id))d.progress=progress.get(d.id);});
@@ -3406,7 +3494,8 @@ document.getElementById('saveBattleImport').addEventListener('click',()=>{
     const attemptEntries=attachAttemptMetadata(entries,rec.opponentClub);
     history.unshift({id:'h'+Date.now(),date:rec.date||new Date().toLocaleString('ko-KR'),opponentClub:rec.opponentClub,source:'screenshot',wins:entries.filter(e=>e.actual==='win').length,losses:entries.filter(e=>e.actual==='loss').length,totalPoints:attemptEntries.reduce((s,e)=>s+e.points,0)+bonuses.reduce((s,b)=>s+b.points,0),entries:attemptEntries,regionBonuses:bonuses});
   }
-  scheduleSave();saveHistoryStorage();renderAtk();renderDef();renderHistory();updateClubHint();
+  scheduleSave();saveHistoryStorage();renderAtk();renderDef();renderSharedLineup();renderHistory();updateClubHint();renderBattleTimeline();
+  const recalculated=computeOrder();if(recalculated){commitRecommendationSnapshot(recalculated,'OCR 기록 반영');lastResults=recalculated.map(r=>({...r,actual:r.attacker?'pending':'none'}));renderOrderList();saveActiveOrderSession();}
   alert(`대전기록을 저장했습니다.${unresolved.length?` 미확인 ${unresolved.length}건은 상태 반영에서 제외했습니다.`:' 공격권과 수비 진행도까지 자동 반영했습니다.'}`);
 });
 
