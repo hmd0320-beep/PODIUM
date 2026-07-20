@@ -557,9 +557,39 @@ footer{
 
 
 .single-roster-grid{grid-template-columns:1fr!important}
+#clubRosterPanel{min-width:0;overflow:hidden}
+.roster-table-wrap{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 #clubRosterPanel .roster-table{min-width:680px}
-#clubRosterPanel{overflow-x:auto}
-@media(max-width:700px){#clubRosterPanel .scan{display:block}#clubRosterPanel .filebtn{display:block;text-align:center;padding:14px 12px;font-size:14px}.single-roster-grid{display:block}.single-roster-grid .panel{margin-bottom:14px}}
+@media(max-width:700px){
+  html,body,.wrap,.mobile-tab-panel{max-width:100%;overflow-x:hidden!important}
+  .mobile-tab-panel{touch-action:pan-y}
+  #clubRosterPanel{touch-action:pan-y}
+  #clubRosterPanel .scan{display:block}
+  #clubRosterPanel .filebtn{display:block;text-align:center;padding:14px 12px;font-size:14px}
+  .single-roster-grid{display:block}.single-roster-grid .panel{margin-bottom:14px}
+  .roster-table-wrap{overflow:visible;touch-action:pan-y}
+  #clubRosterPanel .roster-table{display:block;width:100%;min-width:0;border:0;background:transparent}
+  #clubRosterPanel .roster-table thead{display:none}
+  #clubRosterPanel .roster-table tbody{display:grid;gap:9px;width:100%}
+  #clubRosterPanel .roster-table tr{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 78px 54px;gap:8px 7px;width:100%;padding:11px 10px;border:1px solid var(--border);border-radius:12px;background:var(--panel-alt)}
+  #clubRosterPanel .roster-table td{display:flex;flex-direction:column;gap:5px;min-width:0;padding:0!important;border:0!important;text-align:left!important}
+  #clubRosterPanel .roster-table td:before{font-size:9px;font-weight:800;color:var(--muted);line-height:1}
+  #clubRosterPanel .roster-table td:nth-child(1){grid-column:1/3}
+  #clubRosterPanel .roster-table td:nth-child(1):before{content:'이름'}
+  #clubRosterPanel .roster-table td:nth-child(2){grid-column:3}
+  #clubRosterPanel .roster-table td:nth-child(2):before{content:'순위'}
+  #clubRosterPanel .roster-table td:nth-child(3){grid-column:1;align-items:flex-start}
+  #clubRosterPanel .roster-table td:nth-child(3):before{content:'수비 배치'}
+  #clubRosterPanel .roster-table td:nth-child(4){grid-column:2}
+  #clubRosterPanel .roster-table td:nth-child(4):before{content:'공격 역할'}
+  #clubRosterPanel .roster-table td:nth-child(5){grid-column:3}
+  #clubRosterPanel .roster-table td:nth-child(5):before{content:'개인 공격'}
+  #clubRosterPanel .roster-table td:nth-child(6){position:absolute;right:7px;top:7px;display:block}
+  #clubRosterPanel .roster-table td:nth-child(6):before{display:none}
+  #clubRosterPanel .roster-table input[type=text],#clubRosterPanel .roster-table input[type=number],#clubRosterPanel .roster-table select{width:100%;min-width:0;box-sizing:border-box;font-size:13px;padding:9px 8px}
+  #clubRosterPanel .roster-table input[type=checkbox]{width:22px;height:22px;margin:3px 0 0}
+  #clubRosterPanel .roster-table .rowbtn{width:28px;height:28px;padding:0;border-radius:8px}
+}
 </style>
 </head>
 <body>
@@ -642,14 +672,14 @@ footer{
       <div class="desc">이름·순위·수비 배치·공격 역할·개인 공격권을 한 곳에서 관리합니다.</div>
       <div class="scan">
         <label class="filebtn" for="atkFile">📷 지난 시즌 순위 스크린샷 선택</label>
-        <input type="file" id="atkFile" accept="image/*">
+        <input type="file" id="atkFile" accept="image/*" multiple>
         <span class="scanstatus" id="atkScanStatus">사진을 선택하면 이름과 지난 시즌 순위를 자동으로 인식합니다.</span>
       </div>
       <div class="roster-summary" id="rosterSummary"></div>
-      <table class="roster-table">
+      <div class="roster-table-wrap"><table class="roster-table">
         <thead><tr><th style="width:25%">이름</th><th>순위</th><th>수비</th><th>공격 역할</th><th>개인 공격</th><th></th></tr></thead>
         <tbody id="memberBody"></tbody>
-      </table>
+      </table></div>
       <button class="addbtn" id="addMember">+ 클럽원 추가 (최대 22명)</button>
       <div class="inline-actions">
         <button class="mini-btn" id="autoPlaceBtn">상위 20명 자동 수비 배치</button>
@@ -681,7 +711,7 @@ footer{
       <div class="desc">상대 수비수의 이름·지역(잠실·수원·대구·부산·창원·광주·대전·인천·고척)·지난 시즌 순위·역할·홈구장 여부를 입력하세요. 에이스가 배치된 지역은 경기 점수가 6·4·2점으로 계산됩니다.</div>
       <div class="scan">
         <label class="filebtn" for="defFile">📷 스크린샷 인식</label>
-        <input type="file" id="defFile" accept="image/*">
+        <input type="file" id="defFile" accept="image/*" multiple>
         <span class="scanstatus" id="defScanStatus">캡처한 이미지를 올리면 이름·등수·홈구장 여부를 자동으로 채워요.</span>
       </div>
       <div class="clubrow">
@@ -2739,80 +2769,168 @@ function extractJsonArray(text){
 function cleanOcrLine(line){
   return String(line||'').replace(/[|_]+/g,' ').replace(/\s+/g,' ').trim();
 }
+function normalizeOcrName(value){
+  return cleanOcrLine(value)
+    .replace(/^[\d\s.,#·:;|\-]+/,'')
+    .replace(/[\d\s.,#·:;|\-]+$/,'')
+    .replace(/^[^0-9A-Za-z가-힣]+|[^0-9A-Za-z가-힣]+$/g,'')
+    .trim();
+}
+function normalizeOcrRank(value){
+  let t=String(value||'').replace(/\s+/g,'').replace(/[,，.]/g,'');
+  t=t.replace(/[OoQＤD]/g,'0').replace(/[Il|!]/g,'1').replace(/[Ss]/g,'5').replace(/[Bb]/g,'8');
+  const m=t.match(/\d{1,6}/);
+  return m?Number(m[0]):0;
+}
 function parseRosterOcrText(text, kind){
   const regions=['잠실','수원','대구','부산','창원','광주','대전','인천','고척'];
-  const ignore=/(랭킹|챌린지|지난\s*시즌|실시간|홈런|순위|등수|클럽|전력|타율|리그|전체|TOP|IN\s*1000|승률|기록|보상|메뉴|PODIUM)/i;
+  const ignore=/(랭킹|챌린지|지난\s*시즌|실시간|홈런|순위|등수|클럽|전력|타율|리그|전체|TOP|IN\s*1000|승률|기록|보상|메뉴|PODIUM|평균|OVR|주력|친목)/i;
   const lines=String(text||'').split(/\n+/).map(cleanOcrLine).filter(Boolean);
   const items=[]; let currentRegion='';
   const push=(name,power,region='')=>{
-    name=cleanOcrLine(name).replace(/^[\d\s.,#-]+|[\d\s.,#-]+$/g,'').trim();
-    power=Number(String(power).replace(/[^0-9]/g,''))||0;
-    if(!name||name.length<2||ignore.test(name)||power<1||power>999999)return;
+    name=normalizeOcrName(name); power=normalizeOcrRank(power);
+    if(!name||name.length<1||ignore.test(name)||power<0||power>999999)return;
     if(items.some(x=>x.name===name&&x.power===power))return;
     items.push(kind==='atk'?{name,power}:{name,region:normalizeRegion(region||currentRegion),power,home:false});
   };
   for(let i=0;i<lines.length;i++){
-    const line=lines[i];
-    const region=regions.find(r=>line.includes(r)); if(region) currentRegion=region;
+    const line=lines[i]; const region=regions.find(r=>line.includes(r)); if(region) currentRegion=region;
     if(ignore.test(line) && !/\d/.test(line)) continue;
-    let m=line.match(/^(.{2,24}?)\s+(?:#|순위\s*)?(\d{1,6})(?:\s|$)/i);
+    let m=line.match(/^(.{1,28}?)\s+(?:#|순위\s*)?([\dOoQIl|!SsBb,，.]{1,10})(?:\s|$)/i);
     if(m){push(m[1],m[2],region||currentRegion);continue;}
-    m=line.match(/^(?:#|순위\s*)?(\d{1,6})\s+(.{2,24})$/i);
+    m=line.match(/^(?:#|순위\s*)?([\dOoQIl|!SsBb,，.]{1,10})\s+(.{1,28})$/i);
     if(m){push(m[2],m[1],region||currentRegion);continue;}
     if(i+1<lines.length && !/\d/.test(line)){
-      const n=lines[i+1].match(/(?:#|순위\s*)?(\d{1,6})/i);
-      if(n){push(line,n[1],region||currentRegion);i++;}
+      const n=normalizeOcrRank(lines[i+1]); if(n||/^0+$/.test(lines[i+1].replace(/\D/g,''))){push(line,n,region||currentRegion);i++;}
     }
   }
   return items;
 }
-async function scanImage(file, kind){
-  const statusEl=document.getElementById(kind==='atk'?'atkScanStatus':'defScanStatus');
+function loadOcrImage(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('이미지를 불러오지 못했습니다'))};
+    img.src=url;
+  });
+}
+function detectRosterLayout(img){
+  const ratio=img.width/img.height;
+  // 컴프야 클럽원 명단(전체 화면)과 클럽 상세 정보(팝업) 전용 좌표.
+  if(ratio>0.42&&ratio<0.52){
+    // 하단 홈 인디케이터와 팝업 폭을 보고 상세 정보 화면을 구분한다.
+    const probe=document.createElement('canvas'); probe.width=32; probe.height=32;
+    const ctx=probe.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0,32,32);
+    // 두 화면 모두 세로형이므로 표 시작점 후보를 OCR 결과 개수로 최종 선택한다.
+    return [
+      {name:'club-list',nameX:.135,nameW:.395,rankX:.535,rankW:.185,y:.395,h:.510},
+      {name:'club-detail',nameX:.125,nameW:.320,rankX:.455,rankW:.170,y:.445,h:.405}
+    ];
+  }
+  return [{name:'generic',nameX:.12,nameW:.42,rankX:.54,rankW:.20,y:.32,h:.58}];
+}
+function makeOcrCrop(img,p,mode){
+  const sx=Math.round((mode==='name'?p.nameX:p.rankX)*img.width);
+  const sw=Math.round((mode==='name'?p.nameW:p.rankW)*img.width);
+  const sy=Math.round(p.y*img.height),sh=Math.round(p.h*img.height);
+  const scale=2.4,w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
+  const data=ctx.getImageData(0,0,w,h),d=data.data;
+  for(let i=0;i<d.length;i+=4){
+    const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+    // 어두운 표의 밝은 글자를 검은 글자/흰 배경으로 뒤집고 대비를 강화한다.
+    const v=g>150?0:255;
+    d[i]=d[i+1]=d[i+2]=v; d[i+3]=255;
+  }
+  ctx.putImageData(data,0,0);
+  return c;
+}
+function ocrLines(out,mode){
+  const rawLines=out?.data?.lines||[];
+  const arr=rawLines.map(l=>({
+    text:cleanOcrLine(l.text),confidence:Number(l.confidence)||0,
+    y:((Number(l.bbox?.y0)||0)+(Number(l.bbox?.y1)||0))/2
+  })).filter(x=>x.text);
+  if(arr.length) return arr;
+  return String(out?.data?.text||'').split(/\n+/).map((text,i)=>({text:cleanOcrLine(text),confidence:Number(out?.data?.confidence)||0,y:i*100})).filter(x=>x.text);
+}
+function pairRosterColumns(nameOut,rankOut,kind){
+  const ignore=/(클럽|랭킹|챌린지|지난|시즌|실시간|홈런|순위|정보|평균|OVR|PODIUM)/i;
+  const names=ocrLines(nameOut,'name').map(x=>({...x,name:normalizeOcrName(x.text)})).filter(x=>x.name&&!ignore.test(x.name));
+  const ranks=ocrLines(rankOut,'rank').map(x=>({...x,rank:normalizeOcrRank(x.text)})).filter(x=>x.rank>=0&&(/\d/.test(x.text)||x.rank>0));
+  const used=new Set(),items=[];
+  for(const n of names){
+    let best=-1,bestDist=Infinity;
+    ranks.forEach((r,i)=>{if(used.has(i))return;const dist=Math.abs(r.y-n.y);if(dist<bestDist){bestDist=dist;best=i;}});
+    if(best<0)continue;
+    const r=ranks[best];
+    // 행 높이의 절반보다 먼 숫자는 다른 행으로 간주한다.
+    const typical=(ranks.length>1?Math.abs(ranks[ranks.length-1].y-ranks[0].y)/(ranks.length-1):130);
+    if(bestDist>Math.max(75,typical*.65))continue;
+    used.add(best);
+    const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
+    item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
+  }
+  return items.filter((x,i,a)=>a.findIndex(y=>y.name===x.name&&y.power===x.power)===i);
+}
+async function recognizeRosterScreenshot(file,kind,statusEl,fileNo,totalFiles){
+  const img=await loadOcrImage(file),profiles=detectRosterLayout(img);let best=[];
+  for(let pi=0;pi<profiles.length;pi++){
+    const p=profiles[pi],nameCanvas=makeOcrCrop(img,p,'name'),rankCanvas=makeOcrCrop(img,p,'rank');
+    const prefix=totalFiles>1?`${fileNo}/${totalFiles} · `:'';
+    const nameOut=await Tesseract.recognize(nameCanvas,'kor+eng',{logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}이름 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const rankOut=await Tesseract.recognize(rankCanvas,'eng',{logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}순위 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const paired=pairRosterColumns(nameOut,rankOut,kind);
+    if(paired.length>best.length)best=paired;
+    if(best.length>=6)break;
+  }
+  return best;
+}
+function mergeRosterOcrItems(all){
+  const map=new Map();
+  all.forEach(it=>{
+    const key=String(it.name||'').trim().toLowerCase();if(!key)return;
+    const old=map.get(key);
+    if(!old||Number(it.confidence||0)>Number(old.confidence||0))map.set(key,it);
+  });
+  return [...map.values()];
+}
+async function scanImage(files, kind){
+  files=Array.from(files||[]);const statusEl=document.getElementById(kind==='atk'?'atkScanStatus':'defScanStatus');
   statusEl.className='scanstatus';
   if(!window.Tesseract){statusEl.textContent='OCR 모듈을 불러오지 못했습니다. 인터넷 연결 후 다시 시도해주세요.';statusEl.className='scanstatus err';return;}
-  statusEl.textContent='이미지 준비 중...';
+  if(!files.length)return;
+  statusEl.textContent='전용 OCR 준비 중...';
   try{
-    const out=await Tesseract.recognize(file,'kor+eng',{logger:m=>{
-      if(m.status==='loading tesseract core') statusEl.textContent='OCR 엔진 불러오는 중...';
-      else if(m.status==='loading language traineddata') statusEl.textContent='한글 인식 데이터 불러오는 중...';
-      else if(m.status==='initializing api') statusEl.textContent='OCR 준비 중...';
-      else if(m.status==='recognizing text') statusEl.textContent=`이미지 분석 중... ${Math.round((m.progress||0)*100)}%`;
-    }});
-    const raw=out&&out.data?out.data.text:'';
-    const items=parseRosterOcrText(raw,kind);
+    const gathered=[];
+    for(let i=0;i<files.length;i++) gathered.push(...await recognizeRosterScreenshot(files[i],kind,statusEl,i+1,files.length));
+    const items=mergeRosterOcrItems(gathered);
     if(!items.length) throw new Error('이름과 지난 시즌 순위를 찾지 못했습니다');
     if(kind==='atk'){
       const oldMembers=new Map(clubMembers.filter(m=>String(m.name||'').trim()).map(m=>[String(m.name).trim(),m]));
       const oldAttackers=new Map(attackers.filter(a=>String(a.name||'').trim()).map(a=>[String(a.name).trim(),a]));
-      clubMembers=items.slice(0,22).map((it,i)=>{const name=String(it.name).trim(),old=oldMembers.get(name);return {id:old?.id||newId(),name,power:Number(it.power)||0,defense:old?!!old.defense:i<20};});
+      // 여러 장을 한 번에 선택하면 한 명단으로 합치며, 기존 수동 수정값은 같은 이름 기준으로 유지한다.
+      clubMembers=items.slice(0,22).map((it,i)=>{const name=String(it.name).trim(),old=oldMembers.get(name);return {id:old?.id||newId(),name,power:Number(it.power)||0,defense:old?!!old.defense:i<20,ocrConfidence:Number(it.confidence)||0};});
       attackers=clubMembers.map(m=>{const old=oldAttackers.get(m.name);return {id:old?.id||newId(),name:m.name,power:m.power,role:old?.role||'normal',usedAttacks:Math.max(0,Math.min(3,Number(old?.usedAttacks)||0))};});
-      renderMembers(); renderSharedLineup(); renderAtk(); updateRecommendationReadiness();
+      renderMembers();renderSharedLineup();renderAtk();updateRecommendationReadiness();
     }else{
-      defenders=defenders.filter(r=>r.name.trim()!=='');
-      items.forEach(it=>defenders.push({id:newId(),name:String(it.name),region:normalizeRegion(it.region),power:Number(it.power)||0,role:'normal',hidden:false,progress:0,home:false}));
+      const existing=new Map(defenders.filter(r=>r.name.trim()).map(r=>[r.name.trim().toLowerCase(),r]));
+      items.forEach(it=>{const key=String(it.name).trim().toLowerCase(),old=existing.get(key);if(old){old.power=Number(it.power)||0;}else defenders.push({id:newId(),name:String(it.name),region:normalizeRegion(it.region),power:Number(it.power)||0,role:'normal',hidden:false,progress:0,home:false,ocrConfidence:Number(it.confidence)||0});});
       renderDef();
     }
     scheduleSave();
-    const confidence=Math.round(out?.data?.confidence||0);
-    statusEl.textContent=`${items.length}명 인식 완료${confidence?` · 신뢰도 ${confidence}%`:''}. 이름과 순위를 확인해주세요.`;
+    const low=items.filter(x=>Number(x.confidence||0)<55).length;
+    statusEl.textContent=`${items.length}명 인식 완료${low?` · 확인 필요 ${low}명`:''}. ${files.length>1?`${files.length}장 결과를 중복 제거해 합쳤습니다.`:'이름과 순위를 확인해주세요.'}`;
     statusEl.className='scanstatus ok';
   }catch(err){
-    console.error('명단 OCR 실패',err);
-    statusEl.textContent='인식 실패: '+(err&&err.message?err.message:'알 수 없는 오류')+' (선명한 원본 캡처로 다시 시도해주세요)';
-    statusEl.className='scanstatus err';
+    console.error('명단 OCR 실패',err);statusEl.textContent='인식 실패: '+(err&&err.message?err.message:'알 수 없는 오류')+' (원본 스크린샷을 여러 장 한 번에 선택해주세요)';statusEl.className='scanstatus err';
   }
 }
-
-document.getElementById('atkFile').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(file) scanImage(file, 'atk');
-  e.target.value = '';
-});
-document.getElementById('defFile').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(file) scanImage(file, 'def');
-  e.target.value = '';
-});
+document.getElementById('atkFile').addEventListener('change',e=>{if(e.target.files?.length)scanImage(e.target.files,'atk');e.target.value='';});
+document.getElementById('defFile').addEventListener('change',e=>{if(e.target.files?.length)scanImage(e.target.files,'def');e.target.value='';});
 
 
 
