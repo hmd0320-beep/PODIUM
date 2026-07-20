@@ -630,6 +630,14 @@ footer{
   #defenderRosterPanel>table input[type=checkbox]{width:22px;height:22px;margin:3px 0 0}
   #defenderRosterPanel>table .rowbtn{width:28px;height:28px;padding:0;border-radius:8px}
 }
+
+/* iPhone input stability: prevent Safari zoom and keep the focused field mounted */
+@media(max-width:760px){
+  #tab-roster input[type=text],#tab-roster input[type=number],#tab-roster select,
+  #clubRosterPanel .roster-table input[type=text],#clubRosterPanel .roster-table input[type=number],
+  #defenderRosterPanel input[type=text],#defenderRosterPanel input[type=number]{font-size:16px!important;touch-action:manipulation}
+  #tab-roster input,#tab-roster select{-webkit-user-select:text;user-select:text}
+}
 </style>
 </head>
 <body>
@@ -1461,26 +1469,39 @@ function renderSharedStatus(){
   renderRosterSummary();
 }
 
+// Do not rebuild the roster table while the user is typing. Re-rendering on every
+// keystroke made iPhone Safari dismiss or freeze the keyboard.
 document.getElementById('memberBody').addEventListener('input',e=>{
   const id=e.target.dataset.mid;if(!id)return;
   const m=clubMembers.find(x=>x.id===id);if(!m)return;
-  const field=e.target.dataset.mfield, afield=e.target.dataset.afield;
+  const field=e.target.dataset.mfield;
+  if(field==='name'){
+    const previousName=m.name; m.name=e.target.value; ensureAttackerForMember(m,previousName);
+    scheduleSave();
+  }else if(field==='power'){
+    m.power=Number(e.target.value)||0; ensureAttackerForMember(m); scheduleSave();
+  }
+});
+document.getElementById('memberBody').addEventListener('change',e=>{
+  const id=e.target.dataset.mid;if(!id)return;
+  const m=clubMembers.find(x=>x.id===id);if(!m)return;
+  const field=e.target.dataset.mfield,afield=e.target.dataset.afield;
   if(afield){
     const a=ensureAttackerForMember(m);
-    if(!a){ alert('먼저 클럽원 이름을 입력해주세요.'); renderMembers(); return; }
+    if(!a){alert('먼저 클럽원 이름을 입력해주세요.');return;}
     a[afield]=afield==='usedAttacks'?Math.max(0,Math.min(3,Number(e.target.value)||0)):e.target.value;
-    updateRecommendationReadiness(); scheduleSave(); return;
-  }
-  if(field==='defense'){
+  }else if(field==='defense'){
     if(e.target.checked){
       const placed=getFilledMembers().filter(x=>x.defense&&x.id!==id).length;
-      if(placed>=20){ e.target.checked=false; alert('수비는 최대 20명까지 배치할 수 있습니다.'); return; }
+      if(placed>=20){e.target.checked=false;alert('수비는 최대 20명까지 배치할 수 있습니다.');return;}
       m.defense=true;
     }else m.defense=false;
-  }else if(field==='name'){
-    const previousName=m.name; m.name=e.target.value; ensureAttackerForMember(m,previousName);
-  }else if(field==='power'){ m.power=Number(e.target.value)||0; ensureAttackerForMember(m); }
-  renderMembers(); renderSharedLineup(); updateRecommendationReadiness(); scheduleSave();
+  }
+  renderSharedLineup();updateRecommendationReadiness();scheduleSave();
+});
+document.getElementById('memberBody').addEventListener('focusout',e=>{
+  if(!e.target.dataset.mid)return;
+  renderSharedLineup();updateRecommendationReadiness();scheduleSave();
 });
 document.getElementById('memberBody').addEventListener('click',e=>{
   if(e.target.dataset.maction!=='delete')return;
@@ -2864,8 +2885,8 @@ function detectRosterLayout(img){
     ctx.drawImage(img,0,0,32,32);
     // 두 화면 모두 세로형이므로 표 시작점 후보를 OCR 결과 개수로 최종 선택한다.
     return [
-      {name:'club-list',nameX:.135,nameW:.395,rankX:.535,rankW:.185,y:.395,h:.510},
-      {name:'club-detail',nameX:.125,nameW:.320,rankX:.455,rankW:.170,y:.445,h:.405}
+      {name:'club-list',nameX:.195,nameW:.335,rankX:.535,rankW:.185,y:.392,h:.515},
+      {name:'club-detail',nameX:.105,nameW:.340,rankX:.455,rankW:.170,y:.442,h:.420}
     ];
   }
   return [{name:'generic',nameX:.12,nameW:.42,rankX:.54,rankW:.20,y:.32,h:.58}];
@@ -2874,45 +2895,62 @@ function makeOcrCrop(img,p,mode){
   const sx=Math.round((mode==='name'?p.nameX:p.rankX)*img.width);
   const sw=Math.round((mode==='name'?p.nameW:p.rankW)*img.width);
   const sy=Math.round(p.y*img.height),sh=Math.round(p.h*img.height);
-  const scale=2.4,w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
+  const scale=3.2,w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
   const c=document.createElement('canvas');c.width=w;c.height=h;
   const ctx=c.getContext('2d',{willReadFrequently:true});
+  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(img,sx,sy,sw,sh,0,0,w,h);
-  const data=ctx.getImageData(0,0,w,h),d=data.data;
+  const image=ctx.getImageData(0,0,w,h),d=image.data;
+  // Preserve antialiased edges instead of using one harsh global threshold.
+  // Bright letters on the dark game UI become dark letters on a clean background.
   for(let i=0;i<d.length;i+=4){
     const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-    // 어두운 표의 밝은 글자를 검은 글자/흰 배경으로 뒤집고 대비를 강화한다.
-    const v=g>150?0:255;
-    d[i]=d[i+1]=d[i+2]=v; d[i+3]=255;
+    let v;
+    if(mode==='rank') v=g>132?0:255;
+    else{
+      const inv=255-g;
+      v=Math.max(0,Math.min(255,(inv-70)*1.75));
+      v=255-v;
+    }
+    d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;
   }
-  ctx.putImageData(data,0,0);
+  ctx.putImageData(image,0,0);
   return c;
 }
 function ocrLines(out,mode){
   const rawLines=out?.data?.lines||[];
-  const arr=rawLines.map(l=>({
+  const arr=rawLines.map((l,i)=>({
     text:cleanOcrLine(l.text),confidence:Number(l.confidence)||0,
-    y:((Number(l.bbox?.y0)||0)+(Number(l.bbox?.y1)||0))/2
+    y:((Number(l.bbox?.y0)||0)+(Number(l.bbox?.y1)||0))/2,index:i,hasBox:!!l.bbox
   })).filter(x=>x.text);
-  if(arr.length) return arr;
-  return String(out?.data?.text||'').split(/\n+/).map((text,i)=>({text:cleanOcrLine(text),confidence:Number(out?.data?.confidence)||0,y:i*100})).filter(x=>x.text);
+  if(arr.length)return arr;
+  return String(out?.data?.text||'').split(/\n+/).map((text,i)=>({text:cleanOcrLine(text),confidence:Number(out?.data?.confidence)||0,y:i*100,index:i,hasBox:false})).filter(x=>x.text);
 }
 function pairRosterColumns(nameOut,rankOut,kind){
   const ignore=/(클럽|랭킹|챌린지|지난|시즌|실시간|홈런|순위|정보|평균|OVR|PODIUM)/i;
   const names=ocrLines(nameOut,'name').map(x=>({...x,name:normalizeOcrName(x.text)})).filter(x=>x.name&&!ignore.test(x.name));
   const ranks=ocrLines(rankOut,'rank').map(x=>({...x,rank:normalizeOcrRank(x.text)})).filter(x=>x.rank>=0&&(/\d/.test(x.text)||x.rank>0));
-  const used=new Set(),items=[];
-  for(const n of names){
-    let best=-1,bestDist=Infinity;
-    ranks.forEach((r,i)=>{if(used.has(i))return;const dist=Math.abs(r.y-n.y);if(dist<bestDist){bestDist=dist;best=i;}});
-    if(best<0)continue;
-    const r=ranks[best];
-    // 행 높이의 절반보다 먼 숫자는 다른 행으로 간주한다.
-    const typical=(ranks.length>1?Math.abs(ranks[ranks.length-1].y-ranks[0].y)/(ranks.length-1):130);
-    if(bestDist>Math.max(75,typical*.65))continue;
-    used.add(best);
-    const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
-    item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
+  const items=[];
+  const boxed=names.some(x=>x.hasBox)&&ranks.some(x=>x.hasBox);
+  if(!boxed){
+    const count=Math.min(names.length,ranks.length);
+    for(let i=0;i<count;i++){
+      const n=names[i],r=ranks[i];
+      const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
+      item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
+    }
+  }else{
+    const used=new Set();
+    for(const n of names){
+      let best=-1,bestDist=Infinity;
+      ranks.forEach((r,i)=>{if(used.has(i))return;const dist=Math.abs(r.y-n.y);if(dist<bestDist){bestDist=dist;best=i;}});
+      if(best<0)continue;
+      const r=ranks[best],typical=(ranks.length>1?Math.abs(ranks[ranks.length-1].y-ranks[0].y)/(ranks.length-1):150);
+      if(bestDist>Math.max(90,typical*.7))continue;
+      used.add(best);
+      const item=kind==='atk'?{name:n.name,power:r.rank}:{name:n.name,region:'잠실',power:r.rank,home:false};
+      item.confidence=Math.round((n.confidence+r.confidence)/2);items.push(item);
+    }
   }
   return items.filter((x,i,a)=>a.findIndex(y=>y.name===x.name&&y.power===x.power)===i);
 }
@@ -2921,8 +2959,8 @@ async function recognizeRosterScreenshot(file,kind,statusEl,fileNo,totalFiles){
   for(let pi=0;pi<profiles.length;pi++){
     const p=profiles[pi],nameCanvas=makeOcrCrop(img,p,'name'),rankCanvas=makeOcrCrop(img,p,'rank');
     const prefix=totalFiles>1?`${fileNo}/${totalFiles} · `:'';
-    const nameOut=await Tesseract.recognize(nameCanvas,'kor+eng',{logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}이름 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
-    const rankOut=await Tesseract.recognize(rankCanvas,'eng',{logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}순위 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const nameOut=await Tesseract.recognize(nameCanvas,'kor+eng',{preserve_interword_spaces:'1',tessedit_pageseg_mode:'6',logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}이름 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
+    const rankOut=await Tesseract.recognize(rankCanvas,'eng',{tessedit_char_whitelist:'0123456789,',tessedit_pageseg_mode:'6',logger:m=>{if(m.status==='recognizing text')statusEl.textContent=`${prefix}순위 분석 중... ${Math.round((m.progress||0)*100)}%`;}});
     const paired=pairRosterColumns(nameOut,rankOut,kind);
     if(paired.length>best.length)best=paired;
     if(best.length>=6)break;
