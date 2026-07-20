@@ -414,7 +414,7 @@ footer{
 .attack-allocation{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 14px}.alloc-card{background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;padding:11px 12px}.alloc-card.warn{border-color:rgba(226,104,90,.38)}.alloc-card.good{border-color:rgba(69,194,106,.28)}.alloc-title{font-size:11px;color:var(--muted);margin-bottom:5px}.alloc-value{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700}.alloc-meta{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px}.usage-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.usage-chip{font-size:10.5px;padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--muted)}.usage-chip.full{background:rgba(201,162,77,.14);color:var(--amber)}.usage-chip.over{background:rgba(226,104,90,.14);color:var(--danger)}
 
 
-.manual-record .manual-note{font-size:12px;color:var(--muted);line-height:1.55;margin:4px 0 14px}.manual-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.manual-toolbar input{max-width:260px}.manual-table select{width:100%;min-width:105px;background:var(--panel-alt);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-family:inherit}.manual-table .point-preview{font-weight:700;color:var(--amber);white-space:nowrap}.manual-table .point-preview.zero{color:var(--muted)}.manual-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.manual-summary .quick-pill{margin:0}.source-chip{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:9.5px;vertical-align:1px}
+.manual-record .manual-note{font-size:12px;color:var(--muted);line-height:1.55;margin:4px 0 14px}.record-divider{height:1px;background:var(--border);margin:24px 0}.battle-import h3{font-family:'Oswald',sans-serif;margin:0;font-size:16px}.manual-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.manual-toolbar input{max-width:260px}.manual-table select{width:100%;min-width:105px;background:var(--panel-alt);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-family:inherit}.manual-table .point-preview{font-weight:700;color:var(--amber);white-space:nowrap}.manual-table .point-preview.zero{color:var(--muted)}.manual-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.manual-summary .quick-pill{margin:0}.source-chip{display:inline-block;margin-left:6px;padding:2px 6px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:9.5px;vertical-align:1px}
 
 
 /* Mobile-first battle mode */
@@ -767,7 +767,7 @@ footer{
 
     <div class="panel panel-steel" id="sharedLineupPanel">
       <h2><span class="dot" style="background:var(--steel)"></span>공용 라인업 6회</h2>
-      <div class="desc">점수 획득용 본 공격과 분리하여 상대 전력 확인, 오버롤 감소, 수비 미배치 인원의 보상 참여를 기록합니다.</div>
+      <div class="desc">공용 공격은 개인 공격권과 별개이며, 공격 전에 직접 선택합니다. 클럽 라인업은 개인 라인업보다 강해질 수 없는 구조라 주로 오버롤 -1 조정, 상대 전력 확인, 미배치 인원의 보상 참여에 사용합니다.</div>
       <table class="shared-table">
         <thead><tr><th style="width:34px">회</th><th>사용자</th><th>대상</th><th>목적</th><th>완료</th></tr></thead>
         <tbody id="sharedBody"></tbody>
@@ -879,8 +879,8 @@ footer{
   <div class="board section-gap manual-record">
     <div class="board-head">
       <div>
-        <h2>수동 경기 기록</h2>
-        <div class="manual-note">AI 오더를 만들지 않아도 실제 공격 결과를 직접 입력해 같은 전적 데이터로 저장합니다. 실패 후 같은 수비수를 다시 공격하면 하나의 공략 과정으로 묶고, 모든 시도와 최종 성공 여부를 함께 보관합니다.</div>
+        <h2>경기 기록</h2>
+        <div class="manual-note">직접 입력하거나 대전기록 캡처를 올려 같은 전적 데이터로 저장합니다. 실패 후 같은 수비수를 재공격한 기록도 하나의 공략 과정으로 묶어 보관합니다.</div>
       </div>
     </div>
     <div class="manual-toolbar">
@@ -890,7 +890,7 @@ footer{
     </div>
     <div style="overflow-x:auto">
       <table class="manual-table">
-        <thead><tr><th>#</th><th>공격수</th><th>상대 수비수</th><th>결과</th><th>예상 반영 점수</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>공격 종류</th><th>공격수</th><th>상대 수비수</th><th>결과</th><th>예상 반영 점수</th><th></th></tr></thead>
         <tbody id="manualRows"></tbody>
       </table>
     </div>
@@ -898,12 +898,11 @@ footer{
     <div class="inline-actions" style="margin-top:12px">
       <button class="cta" id="saveManualRecord" type="button">수동 기록 저장</button>
     </div>
-  </div>
-
-  <div class="board section-gap battle-import">
+    <div class="record-divider"></div>
+  <div class="battle-import">
     <div class="board-head">
       <div>
-        <h2>대전기록 캡처 자동 인식</h2>
+        <h3>캡처 자동 인식</h3>
         <div class="desc" style="margin:5px 0 0">게임의 대전 기록 화면을 올리면 날짜·총점·경기별 스코어를 읽고, 양쪽의 공용 라인업 마크를 찾아 자동 구분합니다. 인식 결과는 직접 수정할 수 있습니다.</div>
       </div>
       <label class="ghost" for="battleFile" style="cursor:pointer;">📷 대전기록 불러오기</label>
@@ -927,6 +926,7 @@ footer{
       <button class="mini-btn" id="clearBattleImport">초기화</button>
     </div>
     <details style="margin-top:12px"><summary class="confidence">OCR 원문 확인</summary><textarea class="battle-raw" id="battleRaw" placeholder="인식된 글자가 여기에 표시됩니다."></textarea></details>
+  </div>
   </div>
 
   <div class="board section-gap">
@@ -1226,7 +1226,7 @@ function runBetaDiagnostic(){
   let storageOk=true;try{localStorage.setItem('podium_diag','1');localStorage.removeItem('podium_diag');}catch(e){storageOk=false;}
   add(storageOk,'브라우저 저장소',storageOk?'정상':'저장 권한 또는 용량 확인 필요');
   const filled=clubMembers.filter(m=>String(m.name||'').trim());add(filled.length>0,'클럽원 명단',`${filled.length}명 입력`);
-  const usable=attackers.filter(a=>String(a.name||'').trim()&&(Number(a.usedAttacks)||0)<3);add(usable.length>0,'공격 가능 인원',`${usable.length}명`);
+  const usable=getPersonalAttackers().filter(a=>(Number(a.usedAttacks)||0)<3);add(usable.length>0,'공격 가능 인원',`${usable.length}명`);
   const badAttack=attackers.filter(a=>Number(a.usedAttacks)<0||Number(a.usedAttacks)>3);add(!badAttack.length,'개인 공격권 범위',badAttack.length?`${badAttack.length}명 오류`:'0~3회 정상');
   const badProgress=defenders.filter(d=>Number(d.progress)<0||Number(d.progress)>3);add(!badProgress.length,'수비 진행도 범위',badProgress.length?`${badProgress.length}명 오류`:'0~3단계 정상');
   const placed=defenders.filter(d=>String(d.name||'').trim()&&normalizeRegion(d.region));add(placed.length>0,'상대 지역 배치',`${placed.length}명 배치`);
@@ -1409,6 +1409,17 @@ function memberStatus(member){
   return {label:'미배치', cls:'unplaced'};
 }
 function getFilledMembers(){ return clubMembers.filter(m=>m.name.trim()); }
+function getMemberForAttacker(attacker){
+  const name=String(attacker?.name||'').trim();
+  return name?clubMembers.find(m=>String(m.name||'').trim()===name):null;
+}
+function isPersonalAttackEligible(attacker){
+  const member=getMemberForAttacker(attacker);
+  return !!(member&&member.defense);
+}
+function getPersonalAttackers(){
+  return attackers.filter(a=>String(a.name||'').trim()&&isPersonalAttackEligible(a));
+}
 function getAttackerForMember(member){
   const name=String(member?.name||'').trim();
   return name?attackers.find(a=>String(a.name||'').trim()===name):null;
@@ -1437,8 +1448,8 @@ function renderMembers(){
       <td><input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="클럽원 이름" value="${escapeHtml(m.name)}" data-mid="${m.id}" data-mfield="name"></td>
       <td><input type="text" inputmode="numeric" pattern="[0-9,]*" autocomplete="off" placeholder="순위" value="${m.power||''}" data-mid="${m.id}" data-mfield="power"></td>
       <td style="text-align:center"><input type="checkbox" class="chk" ${m.defense?'checked':''} data-mid="${m.id}" data-mfield="defense" title="${st.label}"></td>
-      <td><select class="role-select" data-mid="${m.id}" data-afield="role">${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.role||'normal')===k?'selected':''}>${v}</option>`).join('')}</select></td>
-      <td><select class="progress-select" data-mid="${m.id}" data-afield="usedAttacks"><option value="0" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===0?'selected':''}>0/3</option><option value="1" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===1?'selected':''}>1/3</option><option value="2" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===2?'selected':''}>2/3</option><option value="3" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===3?'selected':''}>3/3</option></select></td>
+      <td><select class="role-select" data-mid="${m.id}" data-afield="role" ${m.defense?'':'disabled title="미배치 인원은 개인 공격권이 없습니다."'}>${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.role||'normal')===k?'selected':''}>${v}</option>`).join('')}</select></td>
+      <td>${m.defense?`<select class="progress-select" data-mid="${m.id}" data-afield="usedAttacks"><option value="0" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===0?'selected':''}>0/3</option><option value="1" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===1?'selected':''}>1/3</option><option value="2" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===2?'selected':''}>2/3</option><option value="3" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===3?'selected':''}>3/3</option></select>`:`<span class="muted" title="공용 공격은 별도로 사용 가능">개인 없음</span>`}</td>
       <td><button class="rowbtn" data-mid="${m.id}" data-maction="delete">✕</button></td>`;
     body.appendChild(tr);
   });
@@ -1524,6 +1535,7 @@ memberBodyEl.addEventListener('change',e=>{
   const m=clubMembers.find(x=>x.id===id);if(!m)return;
   const field=e.target.dataset.mfield,afield=e.target.dataset.afield;
   if(afield){
+    if(!m.defense){alert('수비 미배치 인원은 개인 공격권이 없습니다. 공용 공격만 별도로 사용할 수 있습니다.');renderMembers();return;}
     const a=ensureAttackerForMember(m);
     if(!a){alert('먼저 클럽원 이름을 입력해주세요.');return;}
     a[afield]=afield==='usedAttacks'?Math.max(0,Math.min(3,Number(e.target.value)||0)):e.target.value;
@@ -1533,6 +1545,7 @@ memberBodyEl.addEventListener('change',e=>{
       if(placed>=20){e.target.checked=false;alert('수비는 최대 20명까지 배치할 수 있습니다.');return;}
       m.defense=true;
     }else m.defense=false;
+    renderMembers();
   }
   refreshSharedMemberOptions();renderRosterSummary();updateRecommendationReadiness();scheduleSave();
 });
@@ -1697,7 +1710,7 @@ function renderTacticalPanel(){
   const rows=pending.slice(0,3).map((r,i)=>({r,i,brief:getBattleAiBrief(r)}));
   const top=rows[0];
   const sharedRemaining=Math.max(0,6-(Array.isArray(sharedLineup)?sharedLineup.filter(s=>s.done).length:0));
-  const personalRemaining=attackers.reduce((sum,a)=>sum+Math.max(0,3-(Number(a.usedAttacks)||0)),0);
+  const personalRemaining=getPersonalAttackers().reduce((sum,a)=>sum+Math.max(0,3-(Number(a.usedAttacks)||0)),0);
   const reserved=pending.filter(r=>r.reserved);
   const alerts=[];
   if(sharedRemaining<=1) alerts.push({t:`공용 공격이 ${sharedRemaining}회 남았습니다. 사용 대상을 다시 확인하세요.`,c:'warn'});
@@ -1760,12 +1773,12 @@ function renderSmartOperationAssistant(){
   const phase=getBattlePhaseInfo(); root.classList.toggle('emergency',phase.emergency);
   document.getElementById('opsModeBadge').textContent=phase.emergency?'EMERGENCY':phase.closing?'CLOSING':'NORMAL';
   document.getElementById('opsPhaseText').textContent=phase.inBattle?`${phase.label} · 종료까지 ${Math.floor(phase.minutesLeft/60)}시간 ${phase.minutesLeft%60}분`:`${phase.label} · 시작까지 ${Math.floor(phase.minutesLeft/60)}시간 ${phase.minutesLeft%60}분`;
-  const validAttackers=attackers.filter(a=>a.name?.trim()&&Number(a.power)>0);
+  const validAttackers=getPersonalAttackers().filter(a=>Number(a.power)>0);
   const validDefenders=defenders.filter(d=>d.name?.trim()&&Number(d.power)>0&&normalizeRegion(d.region));
   const pending=(Array.isArray(lastResults)?lastResults:[]).filter(r=>r?.actual==='pending'&&r.attacker&&r.defender);
   const reserved=pending.filter(r=>r.reserved);
   const sharedRemaining=Math.max(0,6-(Array.isArray(sharedLineup)?sharedLineup.filter(s=>s.done).length:0));
-  const personalRemaining=attackers.reduce((sum,a)=>sum+Math.max(0,3-(Number(a.usedAttacks)||0)),0);
+  const personalRemaining=getPersonalAttackers().reduce((sum,a)=>sum+Math.max(0,3-(Number(a.usedAttacks)||0)),0);
   const aceExists=defenders.some(d=>d.name?.trim()&&d.role==='ace');
   const homeExists=defenders.some(d=>d.name?.trim()&&d.home);
   const checks=[
@@ -1953,7 +1966,7 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
 
 
 function getRecommendationReadiness(){
-  const atkNamed=attackers.filter(a=>a.name.trim());
+  const atkNamed=getPersonalAttackers();
   const defNamed=defenders.filter(d=>d.name.trim()&&(d.progress||0)<3);
   const issues=[];
   if(!atkNamed.length) issues.push('우리 공격 명단이 비어 있습니다.');
@@ -2047,7 +2060,7 @@ function renderAiContext(context=getAiStrategyContext()){
 
 function computeOrder(){
   const maxAttacks=Math.max(1,Math.min(66,Number(document.getElementById('attackLimit')?.value)||60));
-  const validAtk=attackers.filter(a=>a.name.trim()&&a.power>0&&(Number(a.usedAttacks)||0)<3).map(a=>({...a,remainingUses:Math.max(0,3-(Number(a.usedAttacks)||0))}));
+  const validAtk=getPersonalAttackers().filter(a=>a.power>0&&(Number(a.usedAttacks)||0)<3).map(a=>({...a,remainingUses:Math.max(0,3-(Number(a.usedAttacks)||0))}));
   const validDef=defenders.filter(d=>d.name.trim()&&d.power>0&&(d.progress||0)<3);
   if(!validAtk.length||!validDef.length) return null;
 
@@ -2254,7 +2267,7 @@ function buildRegionPlanOverview(){
 function renderAttackAllocation(){
   const host=document.getElementById('attackAllocation');
   if(!host) return;
-  const valid=attackers.filter(a=>a.name.trim()&&a.power>0);
+  const valid=getPersonalAttackers().filter(a=>a.power>0);
   if(!lastResults.length){host.innerHTML='';return;}
   const counts=new Map(valid.map(a=>[a.id,0]));
   lastResults.forEach(r=>{if(r.attacker) counts.set(r.attacker.id,(counts.get(r.attacker.id)||0)+1);});
@@ -2488,7 +2501,7 @@ document.getElementById('calcBtn').addEventListener('click', ()=>{
 
 
 function newManualRow(){
-  return {id:'mr'+Date.now()+Math.random().toString(36).slice(2),attackerId:'',defenderId:'',actual:'win'};
+  return {id:'mr'+Date.now()+Math.random().toString(36).slice(2),attackType:'personal',attackerId:'',defenderId:'',actual:'win'};
 }
 function manualOptions(list, selected, labelFn){
   return `<option value="">선택</option>`+list.map(x=>`<option value="${x.id}" ${x.id===selected?'selected':''}>${escapeHtml(labelFn(x))}</option>`).join('');
@@ -2521,10 +2534,12 @@ function renderManualRows(){
   const preview=calculateManualPreview();
   body.innerHTML=manualRows.map((r,i)=>{
     const pr=preview.rows[i];
+    const attackList=r.attackType==='shared'?attackers.filter(a=>String(a.name||'').trim()):getPersonalAttackers();
     return `<tr>
       <td>${i+1}</td>
-      <td><select data-mid="${r.id}" data-mf="attackerId">${manualOptions(attackers.filter(a=>a.name&&Number(a.power)>0),r.attackerId,a=>`${a.name} · ${a.usedAttacks||0}/3`)}</select></td>
-      <td><select data-mid="${r.id}" data-mf="defenderId">${manualOptions(defenders.filter(d=>d.name&&Number(d.power)>0),r.defenderId,d=>`${d.name} · ${d.region||'미지정'} · ${d.progress||0}/3`)}</select></td>
+      <td><select data-mid="${r.id}" data-mf="attackType"><option value="personal" ${r.attackType!=='shared'?'selected':''}>개인</option><option value="shared" ${r.attackType==='shared'?'selected':''}>공용</option></select></td>
+      <td><select data-mid="${r.id}" data-mf="attackerId">${manualOptions(attackList,r.attackerId,a=>r.attackType==='shared'?`${a.name} · 공용`:`${a.name} · ${a.usedAttacks||0}/3`)}</select></td>
+      <td><select data-mid="${r.id}" data-mf="defenderId">${manualOptions(defenders.filter(d=>String(d.name||'').trim()),r.defenderId,d=>`${d.name} · ${d.region||'미지정'} · ${d.progress||0}/3`)}</select></td>
       <td><select data-mid="${r.id}" data-mf="actual"><option value="win" ${r.actual==='win'?'selected':''}>승</option><option value="loss" ${r.actual==='loss'?'selected':''}>패</option></select></td>
       <td><span class="point-preview ${pr.points?'':'zero'}">${pr.points?`+${pr.points}점`:'0점'}</span></td>
       <td><button class="rowbtn" data-mdel="${r.id}" title="삭제">✕</button></td>
@@ -2540,7 +2555,7 @@ function renderManualRows(){
 }
 document.getElementById('manualRows')?.addEventListener('change',e=>{
   const row=manualRows.find(r=>r.id===e.target.dataset.mid); if(!row)return;
-  row[e.target.dataset.mf]=e.target.value; renderManualRows();
+  row[e.target.dataset.mf]=e.target.value;if(e.target.dataset.mf==='attackType')row.attackerId='';renderManualRows();
 });
 document.getElementById('manualRows')?.addEventListener('click',e=>{
   if(!e.target.dataset.mdel)return;
@@ -2551,26 +2566,57 @@ document.getElementById('clearManualRows')?.addEventListener('click',()=>{manual
 document.getElementById('saveManualRecord')?.addEventListener('click',()=>{
   const filled=manualRows.filter(r=>r.attackerId&&r.defenderId&&(r.actual==='win'||r.actual==='loss'));
   if(!filled.length){alert('저장할 수동 경기 결과를 입력해주세요.');return;}
-  const useAdds=new Map();
-  filled.forEach(r=>useAdds.set(r.attackerId,(useAdds.get(r.attackerId)||0)+1));
-  const over=[];
-  useAdds.forEach((add,id)=>{const a=attackers.find(x=>x.id===id);if(a&&(Number(a.usedAttacks)||0)+add>3)over.push(`${a.name} (${a.usedAttacks||0}+${add}/3)`);});
-  if(over.length){alert(`개인 공격권 3회를 초과합니다:\n${over.join('\n')}`);return;}
+
+  const personalAdds=new Map(),sharedAdds=new Map();
+  filled.forEach(r=>{
+    const map=r.attackType==='shared'?sharedAdds:personalAdds;
+    map.set(r.attackerId,(map.get(r.attackerId)||0)+1);
+  });
+
+  const errors=[];
+  personalAdds.forEach((add,id)=>{
+    const a=attackers.find(x=>x.id===id);
+    if(!a||!isPersonalAttackEligible(a)) errors.push(`${a?.name||'알 수 없음'}: 수비 미배치로 개인 공격 불가`);
+    else if((Number(a.usedAttacks)||0)+add>3) errors.push(`${a.name}: 개인 ${a.usedAttacks||0}+${add}/3`);
+  });
+  const sharedTotal=[...sharedAdds.values()].reduce((sum,n)=>sum+n,0);
+  const sharedUsed=sharedLineup.filter(s=>s.done).length;
+  if(sharedUsed+sharedTotal>6) errors.push(`공용 공격: ${sharedUsed}+${sharedTotal}/6`);
+  sharedAdds.forEach((add,id)=>{
+    const previous=sharedLineup.filter(s=>s.done&&s.memberId===id).length;
+    const a=attackers.find(x=>x.id===id);
+    if(previous+add>2) errors.push(`${a?.name||'알 수 없음'}: 공용 ${previous}+${add}/2`);
+  });
+  if(errors.length){alert(`공격권 규칙을 확인해주세요:
+${errors.join('\n')}`);return;}
+
   const preview=calculateManualPreview();
   const selectedIds=new Set(filled.map(r=>r.id));
   const cursor=new Map();
   const entries=preview.rows.filter(r=>selectedIds.has(r.id)).map(r=>{
     const a=attackers.find(x=>x.id===r.attackerId),d=defenders.find(x=>x.id===r.defenderId);
-    const before=(Number(a?.usedAttacks)||0)+(cursor.get(r.attackerId)||0);cursor.set(r.attackerId,(cursor.get(r.attackerId)||0)+1);
-    return {attacker:a?.name||'미지정',attackerId:a?.id||'',attackerPower:Number(a?.power)||0,defender:d?.name||'미지정',defenderPower:Number(d?.power)||0,home:!!d?.home,region:d?.region||'미지정',predicted:'unknown',actual:r.actual,points:r.points,stageBefore:r.stageBefore,stageAfter:r.stageAfter,attackUseBefore:before,attackUseAfter:before+1};
+    const shared=r.attackType==='shared';
+    const before=shared?null:(Number(a?.usedAttacks)||0)+(cursor.get(r.attackerId)||0);
+    if(!shared) cursor.set(r.attackerId,(cursor.get(r.attackerId)||0)+1);
+    return {attacker:a?.name||'미지정',attackerId:a?.id||'',attackerPower:Number(a?.power)||0,defender:d?.name||'미지정',defenderPower:Number(d?.power)||0,home:!!d?.home,region:d?.region||'미지정',predicted:'unknown',actual:r.actual,points:r.points,stageBefore:r.stageBefore,stageAfter:r.stageAfter,attackType:shared?'shared':'personal',shared,attackUseBefore:before,attackUseAfter:shared?null:before+1};
   });
-  useAdds.forEach((add,id)=>{const a=attackers.find(x=>x.id===id);if(a)a.usedAttacks=Math.min(3,(Number(a.usedAttacks)||0)+add);});
+
+  personalAdds.forEach((add,id)=>{const a=attackers.find(x=>x.id===id);if(a)a.usedAttacks=Math.min(3,(Number(a.usedAttacks)||0)+add);});
+  filled.filter(r=>r.attackType==='shared').forEach(r=>{
+    const slot=sharedLineup.find(s=>!s.done);
+    if(slot){
+      slot.memberId=r.attackerId;
+      slot.target=defenders.find(d=>d.id===r.defenderId)?.name||'';
+      slot.purpose=slot.purpose||'전력 확인';
+      slot.done=true;
+    }
+  });
   defenders.forEach(d=>{d.progress=preview.progress.get(d.id)||0;});
   const wins=entries.filter(e=>e.actual==='win').length,losses=entries.filter(e=>e.actual==='loss').length;
   const opponent=document.getElementById('manualOpponent').value.trim()||document.getElementById('opponentClub').value.trim()||'미지정';
   const attemptEntries=attachAttemptMetadata(entries,opponent);
-  history.unshift({id:'h'+Date.now(),date:new Date().toLocaleString('ko-KR'),opponentClub:opponent,source:'manual',entries:attemptEntries,wins,losses,totalPoints:attemptEntries.reduce((s,e)=>s+e.points,0)+preview.bonuses.reduce((s,b)=>s+b.points,0),regionBonuses:preview.bonuses});
-  saveHistoryStorage();scheduleSave();renderAtk();renderDef();renderHistory();updateClubHint();
+  history.unshift({id:'h'+Date.now(),date:new Date().toLocaleString('ko-KR'),opponentClub:opponent,source:'manual',entries:attemptEntries,wins,losses,totalPoints:attemptEntries.reduce((sum,e)=>sum+e.points,0)+preview.bonuses.reduce((sum,b)=>sum+b.points,0),regionBonuses:preview.bonuses});
+  saveHistoryStorage();scheduleSave();renderAtk();renderDef();renderSharedLineup();renderHistory();updateClubHint();
   manualRows=[newManualRow()];renderManualRows();
   const btn=document.getElementById('saveManualRecord');btn.textContent='저장됨 ✓';setTimeout(()=>btn.textContent='수동 기록 저장',1400);
 });
@@ -3165,6 +3211,37 @@ function getScoreLineYs(ocrData){
   return lines.filter(l=>scoreRe.test(l.text||'')).filter((l,i)=>!(i===0&&/:/.test(l.text||''))).map(l=>(l.bbox.y0+l.bbox.y1)/2).sort((a,b)=>a-b);
 }
 
+
+function normalizeMemberName(v){
+  return String(v||'').toLowerCase().replace(/\s+/g,'').replace(/[^0-9a-z가-힣]/g,'');
+}
+function editDistance(a,b){
+  a=normalizeMemberName(a);b=normalizeMemberName(b);
+  if(!a)return b.length;if(!b)return a.length;
+  const prev=Array.from({length:b.length+1},(_,i)=>i),cur=new Array(b.length+1);
+  for(let i=1;i<=a.length;i++){
+    cur[0]=i;
+    for(let j=1;j<=b.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    for(let j=0;j<=b.length;j++)prev[j]=cur[j];
+  }
+  return prev[b.length];
+}
+function resolveOcrMember(text,list){
+  const q=normalizeMemberName(text);if(!q)return null;
+  const candidates=(list||[]).filter(x=>String(x.name||'').trim());
+  let exact=candidates.find(x=>normalizeMemberName(x.name)===q);if(exact)return exact;
+  exact=candidates.find(x=>normalizeMemberName(x.name).includes(q)||q.includes(normalizeMemberName(x.name)));if(exact)return exact;
+  let best=null,bestScore=0;
+  candidates.forEach(x=>{const n=normalizeMemberName(x.name),d=editDistance(q,n),score=1-d/Math.max(q.length,n.length,1);if(score>bestScore){bestScore=score;best=x;}});
+  return bestScore>=0.62?best:null;
+}
+function battleMemberOptions(list,selectedId,fallback){
+  const selected=String(selectedId||'');
+  let html='<option value="">선택</option>';
+  if(!selected&&String(fallback||'').trim())html+=`<option value="" selected>${escapeHtml(fallback)} · 미확인</option>`;
+  html+=(list||[]).filter(x=>String(x.name||'').trim()).map(x=>`<option value="${x.id}" ${x.id===selected?'selected':''}>${escapeHtml(x.name)}${Number(x.power)>0?' · '+Number(x.power).toLocaleString()+'위':''}</option>`).join('');
+  return html;
+}
 function normalizeOcrText(text){
   return String(text||'').replace(/[|]/g,'I').replace(/\s+:/g,':').replace(/:\s+/g,': ').trim();
 }
@@ -3186,7 +3263,7 @@ function parseBattleOcr(text){
     const result=a>b?'win':a<b?'loss':'draw';
     const knownMembers=getFilledMembers().map(x=>x.name).filter(Boolean);
     const isShared=knownMembers.length && !knownMembers.some(n=>before.includes(n)||after.includes(n));
-    rows.push({id:'br'+Date.now()+Math.random(),ours:before,theirs:after,ourScore:a,theirScore:b,result,type:isShared?'shared':'normal'});
+    const am=resolveOcrMember(before,attackers),dm=resolveOcrMember(after,defenders); rows.push({id:'br'+Date.now()+Math.random(),ours:am?.name||before,theirs:dm?.name||after,attackerId:am?.id||'',defenderId:dm?.id||'',ourScore:a,theirScore:b,result,type:isShared?'shared':'normal'});
   });
   return {date,match,total,opponent:'',rows};
 }
@@ -3195,9 +3272,9 @@ function renderBattleRows(){
   if(!currentBattleRows.length){body.innerHTML='<tr><td colspan="7" class="empty">아직 인식된 기록이 없습니다.</td></tr>';return;}
   body.innerHTML=currentBattleRows.map((r,i)=>`<tr>
     <td>${i+1}</td>
-    <td><input type="text" value="${escapeHtml(r.ours||'')}" data-bid="${r.id}" data-bfield="ours"></td>
-    <td><input type="text" value="${escapeHtml(r.theirs||'')}" data-bid="${r.id}" data-bfield="theirs"></td>
-    <td><div style="display:flex;gap:5px;align-items:center"><input type="number" value="${r.ourScore}" data-bid="${r.id}" data-bfield="ourScore" style="width:62px"><span>-</span><input type="number" value="${r.theirScore}" data-bid="${r.id}" data-bfield="theirScore" style="width:62px"></div></td>
+    <td><select data-bid="${r.id}" data-bfield="attackerId">${battleMemberOptions(attackers,r.attackerId,r.ours)}</select></td>
+    <td><select data-bid="${r.id}" data-bfield="defenderId">${battleMemberOptions(defenders,r.defenderId,r.theirs)}</select></td>
+    <td><div style="display:flex;gap:5px;align-items:center"><input type="number" inputmode="numeric" value="${r.ourScore}" data-bid="${r.id}" data-bfield="ourScore" style="width:62px"><span>-</span><input type="number" inputmode="numeric" value="${r.theirScore}" data-bid="${r.id}" data-bfield="theirScore" style="width:62px"></div></td>
     <td><span class="tag ${r.result==='win'?'win':r.result==='loss'?'risk':'none'}">${r.result==='win'?'승':r.result==='loss'?'패':'무'}</span></td>
     <td><select data-bid="${r.id}" data-bfield="type"><option value="normal" ${r.type==='normal'?'selected':''}>일반 공격</option><option value="shared" ${r.type==='shared'?'selected':''}>공용 라인업${r.iconDetected?' ✓':''}</option><option value="unknown" ${r.type==='unknown'?'selected':''}>확인 필요</option></select>${r.iconDetected?'<div class="confidence">마크 자동 인식</div>':''}</td>
     <td><button class="rowbtn" data-bdel="${r.id}">✕</button></td>
@@ -3212,14 +3289,22 @@ function resetBattleImport(){
 }
 document.getElementById('battleRows').addEventListener('input',e=>{
   const r=currentBattleRows.find(x=>x.id===e.target.dataset.bid); if(!r)return;
-  const f=e.target.dataset.bfield; r[f]=(f==='ourScore'||f==='theirScore')?Number(e.target.value)||0:e.target.value;
-  r.result=r.ourScore>r.theirScore?'win':r.ourScore<r.theirScore?'loss':'draw'; renderBattleRows();
+  const f=e.target.dataset.bfield;
+  if(f==='ourScore'||f==='theirScore'){
+    r[f]=Number(e.target.value)||0;
+    r.result=r.ourScore>r.theirScore?'win':r.ourScore<r.theirScore?'loss':'draw';
+    const tag=e.target.closest('tr')?.querySelector('.tag');
+    if(tag){tag.textContent=r.result==='win'?'승':r.result==='loss'?'패':'무';tag.className='tag '+(r.result==='win'?'win':r.result==='loss'?'risk':'none');}
+  }
 });
 document.getElementById('battleRows').addEventListener('change',e=>{
-  const r=currentBattleRows.find(x=>x.id===e.target.dataset.bid); if(r&&e.target.dataset.bfield==='type')r.type=e.target.value;
+  const r=currentBattleRows.find(x=>x.id===e.target.dataset.bid); if(!r)return;
+  const f=e.target.dataset.bfield;r[f]=e.target.value;
+  if(f==='attackerId'){const a=attackers.find(x=>x.id===r.attackerId);if(a)r.ours=a.name;}
+  if(f==='defenderId'){const d=defenders.find(x=>x.id===r.defenderId);if(d)r.theirs=d.name;}
 });
 document.getElementById('battleRows').addEventListener('click',e=>{if(e.target.dataset.bdel){currentBattleRows=currentBattleRows.filter(r=>r.id!==e.target.dataset.bdel);renderBattleRows();}});
-document.getElementById('addBattleRow').addEventListener('click',()=>{currentBattleRows.push({id:'br'+Date.now(),ours:'',theirs:'',ourScore:0,theirScore:0,result:'draw',type:'unknown'});renderBattleRows();});
+document.getElementById('addBattleRow').addEventListener('click',()=>{currentBattleRows.push({id:'br'+Date.now(),ours:'',theirs:'',attackerId:'',defenderId:'',ourScore:0,theirScore:0,result:'draw',type:'unknown'});renderBattleRows();});
 document.getElementById('clearBattleImport').addEventListener('click',resetBattleImport);
 document.getElementById('battleFile').addEventListener('change',async e=>{
   const file=e.target.files[0]; e.target.value=''; if(!file)return;
@@ -3251,14 +3336,33 @@ document.getElementById('battleFile').addEventListener('change',async e=>{
 });
 document.getElementById('saveBattleImport').addEventListener('click',()=>{
   if(!currentBattleRows.length){alert('저장할 경기 기록이 없습니다.');return;}
-  const rec={id:'bi'+Date.now(),date:document.getElementById('battleDate').value,match:document.getElementById('battleMatch').value,opponentClub:document.getElementById('battleOpponent').value.trim()||'미지정',total:document.getElementById('battleTotal').value,rows:currentBattleRows.map(r=>({...r}))};
+  const rec={id:'bi'+Date.now(),date:document.getElementById('battleDate').value,match:document.getElementById('battleMatch').value,opponentClub:document.getElementById('battleOpponent').value.trim()||document.getElementById('manualOpponent')?.value.trim()||document.getElementById('opponentClub')?.value.trim()||'미지정',total:document.getElementById('battleTotal').value,rows:currentBattleRows.map(r=>({...r}))};
+  const normal=rec.rows.filter(r=>r.type==='normal'&&(r.result==='win'||r.result==='loss'));
+  const unresolved=normal.filter(r=>!r.attackerId||!r.defenderId);
+  if(unresolved.length&&!confirm(`${unresolved.length}경기의 공격수 또는 수비수가 확인되지 않았습니다. 미확인 경기는 전적만 보관하고 공격권·점령 진행도에는 반영하지 않을까요?`))return;
   battleImports.unshift(rec);
-  const normal=rec.rows.filter(r=>r.type==='normal');
   if(normal.length){
-    const ocrEntries=normal.map(r=>({attacker:r.ours||'미인식',defender:r.theirs||'미인식',defenderPower:0,home:false,attackerPower:0,predicted:'unknown',actual:r.result==='win'?'win':'loss',points:0,score:`${r.ourScore}-${r.theirScore}`}));
-    history.unshift({id:'h'+Date.now(),date:rec.date||new Date().toLocaleString('ko-KR'),opponentClub:rec.opponentClub,source:'screenshot',wins:normal.filter(r=>r.result==='win').length,losses:normal.filter(r=>r.result==='loss').length,totalPoints:0,entries:attachAttemptMetadata(ocrEntries,rec.opponentClub)});
+    const beforeProgress=new Map(defenders.map(d=>[d.id,Math.max(0,Math.min(3,Number(d.progress)||0))]));
+    const progress=new Map(beforeProgress);
+    const useCursor=new Map(),entries=[];
+    normal.forEach(r=>{
+      const a=attackers.find(x=>x.id===r.attackerId),d=defenders.find(x=>x.id===r.defenderId);
+      let points=0,stageBefore=d?(progress.get(d.id)||0):0;
+      if(d&&r.result==='win'){
+        const stages=getRegionStagePoints(d.region||'미지정');points=stages[Math.min(2,stageBefore)]||0;progress.set(d.id,Math.min(3,stageBefore+1));
+      }
+      const before=a?(Number(a.usedAttacks)||0)+(useCursor.get(a.id)||0):0;
+      if(a)useCursor.set(a.id,(useCursor.get(a.id)||0)+1);
+      entries.push({attacker:a?.name||r.ours||'미인식',attackerId:a?.id||'',defender:d?.name||r.theirs||'미인식',defenderId:d?.id||'',defenderPower:Number(d?.power)||0,home:!!d?.home,region:d?.region||'미지정',attackerPower:Number(a?.power)||0,predicted:'unknown',actual:r.result,points,stageBefore,stageAfter:d&&r.result==='win'?Math.min(3,stageBefore+1):stageBefore,attackUseBefore:before,attackUseAfter:a?before+1:before,score:`${r.ourScore}-${r.theirScore}`});
+    });
+    useCursor.forEach((add,id)=>{const a=attackers.find(x=>x.id===id);if(a)a.usedAttacks=Math.min(3,(Number(a.usedAttacks)||0)+add);});
+    defenders.forEach(d=>{if(progress.has(d.id))d.progress=progress.get(d.id);});
+    const bonuses=[];getRegionGroups().forEach(g=>{const before=g.members.every(m=>(beforeProgress.get(m.id)||0)>=3),after=g.members.every(m=>(progress.get(m.id)||0)>=3);if(after&&!before)bonuses.push({region:g.name,points:g.home?HOME_BONUS:AWAY_BONUS,home:g.home});});
+    const attemptEntries=attachAttemptMetadata(entries,rec.opponentClub);
+    history.unshift({id:'h'+Date.now(),date:rec.date||new Date().toLocaleString('ko-KR'),opponentClub:rec.opponentClub,source:'screenshot',wins:entries.filter(e=>e.actual==='win').length,losses:entries.filter(e=>e.actual==='loss').length,totalPoints:attemptEntries.reduce((s,e)=>s+e.points,0)+bonuses.reduce((s,b)=>s+b.points,0),entries:attemptEntries,regionBonuses:bonuses});
   }
-  scheduleSave();saveHistoryStorage();renderHistory();alert('대전기록을 저장했습니다. 공용 라인업 행은 별도 기록으로 보존됩니다.');
+  scheduleSave();saveHistoryStorage();renderAtk();renderDef();renderHistory();updateClubHint();
+  alert(`대전기록을 저장했습니다.${unresolved.length?` 미확인 ${unresolved.length}건은 상태 반영에서 제외했습니다.`:' 공격권과 수비 진행도까지 자동 반영했습니다.'}`);
 });
 
 document.getElementById('exportJson').addEventListener('click',()=>{
@@ -3445,7 +3549,7 @@ function renderBattleRights(current){
   const grid=document.getElementById('bmRightsGrid'),summary=document.getElementById('bmRightsSummary');
   if(!grid||!summary)return;
   const usage=getLiveAttackUsage();
-  const list=attackers.filter(a=>a.name&&Number(a.power)>0).sort((a,b)=>(usage.get(a.id)||0)-(usage.get(b.id)||0)||Number(a.power)-Number(b.power));
+  const list=attackers.filter(a=>String(a.name||'').trim()).sort((a,b)=>(usage.get(a.id)||0)-(usage.get(b.id)||0)||Number(a.power)-Number(b.power));
   const available=list.filter(a=>(usage.get(a.id)||0)<3).length;
   summary.textContent=`${available}명 가능 · 총 ${list.reduce((n,a)=>n+Math.max(0,3-(usage.get(a.id)||0)),0)}회 남음`;
   grid.innerHTML=list.length?list.map(a=>{
