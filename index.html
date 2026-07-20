@@ -2510,7 +2510,8 @@ function calculateManualPreview(){
   const progress=new Map(defenders.map(d=>[d.id,Math.max(0,Math.min(3,Number(d.progress)||0))]));
   const rows=[];
   manualRows.forEach(r=>{
-    const d=defenders.find(x=>x.id===r.defenderId);
+    const isComplete=!!(r.attackerId&&r.defenderId&&(r.actual==='win'||r.actual==='loss'));
+    const d=isComplete?defenders.find(x=>x.id===r.defenderId):null;
     let points=0,stageBefore=d?(progress.get(d.id)||0):0;
     if(d&&r.actual==='win'){
       const stages=getRegionStagePoints(d.region||'미지정');
@@ -2553,9 +2554,29 @@ function renderManualRows(){
     <span class="quick-pill good">예상 반영 <strong>${preview.total}점</strong></span>
     <span class="quick-pill">점령 <strong>${preview.bonuses.length}지역</strong></span>`;
 }
-document.getElementById('manualRows')?.addEventListener('change',e=>{
-  const row=manualRows.find(r=>r.id===e.target.dataset.mid); if(!row)return;
-  row[e.target.dataset.mf]=e.target.value;if(e.target.dataset.mf==='attackType')row.attackerId='';renderManualRows();
+function syncManualRowsFromDom(){
+  const body=document.getElementById('manualRows');
+  if(!body)return;
+  body.querySelectorAll('select[data-mid][data-mf]').forEach(el=>{
+    const row=manualRows.find(r=>r.id===el.dataset.mid);
+    if(row) row[el.dataset.mf]=el.value;
+  });
+}
+function refreshManualPreviewFromDom(){
+  syncManualRowsFromDom();
+  renderManualRows();
+}
+['input','change'].forEach(eventName=>{
+  document.getElementById('manualRows')?.addEventListener(eventName,e=>{
+    const el=e.target.closest?.('select[data-mid][data-mf]');
+    if(!el)return;
+    const row=manualRows.find(r=>r.id===el.dataset.mid);
+    if(!row)return;
+    const previousType=row.attackType;
+    row[el.dataset.mf]=el.value;
+    if(el.dataset.mf==='attackType'&&previousType!==el.value) row.attackerId='';
+    requestAnimationFrame(()=>renderManualRows());
+  });
 });
 document.getElementById('manualRows')?.addEventListener('click',e=>{
   if(!e.target.dataset.mdel)return;
@@ -2563,7 +2584,10 @@ document.getElementById('manualRows')?.addEventListener('click',e=>{
 });
 document.getElementById('addManualRow')?.addEventListener('click',()=>{manualRows.push(newManualRow());renderManualRows();});
 document.getElementById('clearManualRows')?.addEventListener('click',()=>{manualRows=[newManualRow()];renderManualRows();});
-document.getElementById('saveManualRecord')?.addEventListener('click',()=>{
+document.getElementById('saveManualRecord')?.addEventListener('click',async()=>{
+  // iOS Safari에서 select의 change 이벤트가 늦게 전달되는 경우가 있어
+  // 저장 직전에 화면의 현재 선택값을 반드시 다시 읽는다.
+  syncManualRowsFromDom();
   const filled=manualRows.filter(r=>r.attackerId&&r.defenderId&&(r.actual==='win'||r.actual==='loss'));
   if(!filled.length){alert('저장할 수동 경기 결과를 입력해주세요.');return;}
 
@@ -2616,13 +2640,34 @@ ${errors.join('\n')}`);return;}
   const opponent=document.getElementById('manualOpponent').value.trim()||document.getElementById('opponentClub').value.trim()||'미지정';
   const attemptEntries=attachAttemptMetadata(entries,opponent);
   history.unshift({id:'h'+Date.now(),date:new Date().toLocaleString('ko-KR'),opponentClub:opponent,source:'manual',entries:attemptEntries,wins,losses,totalPoints:attemptEntries.reduce((sum,e)=>sum+e.points,0)+preview.bonuses.reduce((sum,b)=>sum+b.points,0),regionBonuses:preview.bonuses});
-  saveHistoryStorage();scheduleSave();renderAtk();renderDef();renderSharedLineup();renderHistory();updateClubHint();
+
+  // 수동 기록 저장 직후 현재 전장 상태와 추천 오더까지 즉시 다시 계산한다.
+  // 이전에는 명단/전적 표만 다시 그려서 화면의 오더가 그대로 남아
+  // 사용자가 기록이 반영되지 않은 것처럼 보이는 문제가 있었다.
+  const recalculated=computeOrder();
+  if(recalculated){
+    commitRecommendationSnapshot(recalculated,'수동 기록 반영');
+    lastResults=recalculated.map(r=>({...r,actual:r.attacker?'pending':'none'}));
+  }else{
+    lastResults=[];
+  }
+
+  await saveHistoryStorage();
+  scheduleSave();
+  saveActiveOrderSession();
+  renderAtk();renderDef();renderSharedLineup();renderHistory();renderOrderList();
+  updateClubHint();updateRecommendationReadiness();renderBattleTimeline();
+  createAutoSnapshot('수동 기록 반영 완료',true);
+  addOperationLog('result','수동 기록 반영',`${wins}승 ${losses}패 · ${attemptEntries.reduce((sum,e)=>sum+e.points,0)+preview.bonuses.reduce((sum,b)=>sum+b.points,0)}점`);
+
   manualRows=[newManualRow()];renderManualRows();
-  const btn=document.getElementById('saveManualRecord');btn.textContent='저장됨 ✓';setTimeout(()=>btn.textContent='수동 기록 저장',1400);
+  const btn=document.getElementById('saveManualRecord');btn.textContent='반영 완료 ✓';setTimeout(()=>btn.textContent='수동 기록 저장',1400);
 });
 
 function saveHistoryStorage(){
-  storageApi.set('cb_history', JSON.stringify(history), false).then(()=>createAutoSnapshot('전적 저장')).catch(()=>{});
+  return storageApi.set('cb_history', JSON.stringify(history), false)
+    .then(()=>{createAutoSnapshot('전적 저장');return true;})
+    .catch(err=>{console.error('전적 저장 실패',err);return false;});
 }
 
 
