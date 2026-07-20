@@ -638,6 +638,35 @@ footer{
   #defenderRosterPanel input[type=text],#defenderRosterPanel input[type=number]{font-size:16px!important;touch-action:manipulation}
   #tab-roster input,#tab-roster select{-webkit-user-select:text;user-select:text}
 }
+
+/* Final iPhone keyboard fix: roster fields must remain native, tappable and stable. */
+@media(max-width:760px){
+  #tab-roster input[type="text"],#tab-roster input[inputmode="numeric"]{
+    font-size:16px!important;
+    touch-action:auto!important;
+    -webkit-user-select:text!important;
+    user-select:text!important;
+    pointer-events:auto!important;
+    position:relative;
+    z-index:2;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  #clubRosterPanel .roster-table td{pointer-events:auto}
+  #clubRosterPanel .roster-table tr{touch-action:pan-y}
+}
+
+/* iOS Safari: editable roster fields must keep native tap and keyboard behavior. */
+@media(max-width:760px){
+  #tab-roster{touch-action:auto!important;contain:none!important;overflow-x:hidden!important}
+  #tab-roster .panel,#clubRosterPanel,#clubRosterPanel .roster-table-wrap,
+  #clubRosterPanel .roster-table,#clubRosterPanel .roster-table tbody,
+  #clubRosterPanel .roster-table tr,#clubRosterPanel .roster-table td{touch-action:auto!important}
+  #clubRosterPanel .roster-table input[type="text"]{
+    min-height:44px!important;line-height:1.25!important;cursor:text!important;
+    pointer-events:auto!important;-webkit-user-select:text!important;user-select:text!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1405,8 +1434,8 @@ function renderMembers(){
     const st=memberStatus(m);
     const tr=document.createElement('tr');
     tr.innerHTML=`
-      <td><input type="text" placeholder="클럽원 이름" value="${escapeHtml(m.name)}" data-mid="${m.id}" data-mfield="name"></td>
-      <td><input type="number" placeholder="순위" value="${m.power||''}" data-mid="${m.id}" data-mfield="power"></td>
+      <td><input type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="클럽원 이름" value="${escapeHtml(m.name)}" data-mid="${m.id}" data-mfield="name"></td>
+      <td><input type="text" inputmode="numeric" pattern="[0-9,]*" autocomplete="off" placeholder="순위" value="${m.power||''}" data-mid="${m.id}" data-mfield="power"></td>
       <td style="text-align:center"><input type="checkbox" class="chk" ${m.defense?'checked':''} data-mid="${m.id}" data-mfield="defense" title="${st.label}"></td>
       <td><select class="role-select" data-mid="${m.id}" data-afield="role">${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.role||'normal')===k?'selected':''}>${v}</option>`).join('')}</select></td>
       <td><select class="progress-select" data-mid="${m.id}" data-afield="usedAttacks"><option value="0" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===0?'selected':''}>0/3</option><option value="1" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===1?'selected':''}>1/3</option><option value="2" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===2?'selected':''}>2/3</option><option value="3" ${(attackers.find(a=>a.name.trim()===m.name.trim())?.usedAttacks||0)===3?'selected':''}>3/3</option></select></td>
@@ -1469,20 +1498,28 @@ function renderSharedStatus(){
   renderRosterSummary();
 }
 
-// Do not rebuild the roster table while the user is typing. Re-rendering on every
-// keystroke made iPhone Safari dismiss or freeze the keyboard.
-document.getElementById('memberBody').addEventListener('input',e=>{
-  const id=e.target.dataset.mid;if(!id)return;
+// iPhone Safari keyboard-safe roster editing.
+// While an input is focused, only update the in-memory value. Do not rebuild any
+// roster-related DOM and do not start asynchronous saves/snapshots until editing ends.
+let rosterInputComposing=false;
+let rosterSavePending=false;
+const memberBodyEl=document.getElementById('memberBody');
+memberBodyEl.addEventListener('compositionstart',()=>{rosterInputComposing=true;});
+memberBodyEl.addEventListener('compositionend',e=>{rosterInputComposing=false;updateMemberDraft(e.target);});
+function updateMemberDraft(target){
+  const id=target?.dataset?.mid;if(!id)return;
   const m=clubMembers.find(x=>x.id===id);if(!m)return;
-  const field=e.target.dataset.mfield;
-  if(field==='name'){
-    const previousName=m.name; m.name=e.target.value; ensureAttackerForMember(m,previousName);
-    scheduleSave();
-  }else if(field==='power'){
-    m.power=Number(e.target.value)||0; ensureAttackerForMember(m); scheduleSave();
-  }
+  const field=target.dataset.mfield;
+  if(field==='name')m.name=target.value;
+  else if(field==='power')m.power=Number(String(target.value).replace(/[^0-9]/g,''))||0;
+  rosterSavePending=true;
+}
+memberBodyEl.addEventListener('input',e=>{
+  if(!e.target.dataset.mid)return;
+  updateMemberDraft(e.target);
+  // Never trigger render/save during Korean IME composition or ordinary typing.
 });
-document.getElementById('memberBody').addEventListener('change',e=>{
+memberBodyEl.addEventListener('change',e=>{
   const id=e.target.dataset.mid;if(!id)return;
   const m=clubMembers.find(x=>x.id===id);if(!m)return;
   const field=e.target.dataset.mfield,afield=e.target.dataset.afield;
@@ -1497,11 +1534,19 @@ document.getElementById('memberBody').addEventListener('change',e=>{
       m.defense=true;
     }else m.defense=false;
   }
-  renderSharedLineup();updateRecommendationReadiness();scheduleSave();
+  refreshSharedMemberOptions();renderRosterSummary();updateRecommendationReadiness();scheduleSave();
 });
-document.getElementById('memberBody').addEventListener('focusout',e=>{
+memberBodyEl.addEventListener('focusout',e=>{
   if(!e.target.dataset.mid)return;
-  renderSharedLineup();updateRecommendationReadiness();scheduleSave();
+  // Wait one tick so moving between two roster inputs does not disturb the keyboard.
+  setTimeout(()=>{
+    if(memberBodyEl.contains(document.activeElement))return;
+    syncRosterAttackers();
+    refreshSharedMemberOptions();
+    renderRosterSummary();
+    updateRecommendationReadiness();
+    if(rosterSavePending){rosterSavePending=false;scheduleSave();}
+  },80);
 });
 document.getElementById('memberBody').addEventListener('click',e=>{
   if(e.target.dataset.maction!=='delete')return;
